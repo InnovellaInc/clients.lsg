@@ -1,0 +1,126 @@
+2014-JUL-08
+Database Objects
+	Build Tables [DONE!]
+		tblResourceType
+		tblResource
+		tblCompanyType
+		tblCompany
+		tblUserType
+		tblUser
+		tblResource_Company
+		tblResource_Location
+		tblResource_Project
+		tblProjectAsset
+
+	Build Views [DONE!]
+		tvwResourceType
+		tvwResource
+		tvwCompanyType
+		tvwCompany
+		tvwUserType
+		tvwUser
+		tvwResource_Company
+		tvwUser_Company
+		tvwResource_Location
+		tvwProject_Location
+		tvwUser_Location
+		tvwResource_Project
+		tvwUser_Project
+		tvwProjectAsset
+
+	Build Create/Read/Update/Delete (CRUD) stored procedures
+		ispResourceType	[Done!]
+		gfpResourceType	[Done!]
+		uspResourceType	[Done!]
+		dspResourceType	[Done!]
+		ispResource	[Done!]
+		gfpResource	[Done!]
+		uspResource	[Done!]
+		dspResource	[Done!]
+		ispCompany	[Done!]
+		gfpCompany	[Done!]
+		uspCompany	[Done!]
+		dspCompany	[Done!]
+		ispUserType	[Done!]
+		gfpUserType	[Done!]
+		uspUserType	[Done!]
+		dspUserType	[Done!]
+		ispUser	[Done!]
+		gfpUser	[Done!]
+		dspUser	[Done!]
+		uspUser	[Done!]
+		ispResource_Company	[Done!]
+		gfpResource_Company	[Done!]
+		uspResource_Company	[Done!]
+		dspResource_Company	[Done!]
+		ispUser_Company	[Done!]
+		gfpUser_Company	[Done!]
+		uspUser_Company	[Done!]
+		dspUser_Company	[Done!]
+		ispResource_Location	[30 min]
+		gfpResource_Location	[30 min]
+		uspResource_Location	[30 min]
+		dspResource_Location	[30 min]
+		ispProject_Location	[30 min]
+		gfpProject_Location	[30 min]
+		uspProject_Location	[30 min]
+		dspProject_Location	[30 min]
+		ispUser_Location	[30 min]
+		gfpUser_Location	[30 min]
+		uspUser_Location	[30 min]
+		dspUser_Location	[30 min]
+		ispResource_Project	[30 min]
+		gfpResource_Project	[30 min]
+		uspResource_Project	[30 min]
+		dspResource_Project	[30 min]
+		ispUser_Project	[30 min]
+		gfpUser_Project	[30 min]
+		uspUser_Project	[30 min]
+		dspUser_Project	[30 min]
+		ispProjectAsset	[30 min]
+		gfpProjectAsset	[30 min]
+		uspProjectAsset	[30 min]
+		dspProjectAsset	[30 min]
+
+Web Site Business Logic Objects
+	Build Data Access Objects (web site business layer)
+		class.ResourceType	[Done!]
+		class.Resource	[Done!]
+		class.CompanyType	[Done!]
+		class.Company	[Done!]
+		class.UserType	[Done!]
+		class.User	[Done!]
+		class.Resource_Company	[Done!]
+		class.User_Company	[Done!]
+		class.Resource_Location	[1 hr]
+		class.Project_Location	[1 hr]
+		class.User_Location	[1 hr]
+		class.Resource_Project	[1 hr]
+		class.User_Project	[1 hr]
+		class.ProjectAsset	[1 hr]
+
+Web Site Presentation Objects
+	Build Web Responsive Pages
+		Registration	[Done]
+		Login	[Done]
+		ForgotPassword	[Done]
+		CompanyDashboard	(Main Page)	[8 hrs]
+		AddCompanyUser	(Staff)	[4 hrs]
+		EditCompanyUser	(Staff)	[4 hrs]
+		DisableCompanyUser	(Staff)	[4 hrs]
+		ProjectDashboard	[4 hrs]
+		AddProject	[4 hrs]
+		EditProject	[2 hrs]
+		DisableProject	[2 hrs]
+		AddProjectUser	(Staff & Client)	[8 hrs]
+		EditProjectUser	(Staff & Client)	[4 hrs]
+		DisableProjectUser	(Staff & Client)	[2 hrs]
+		AddProjectAsset	(Blueprints, Contracts, Warranties, Images etc.)	[6 hrs]
+		EditProjectAsset	(Blueprints, Contracts, Warranties, Images etc.)	[2 hrs]
+		DisableProjectAsset	(Blueprints, Contracts, Warranties, Images etc.)	[2 hrs]
+		EmailDashboard	(Correspondence)	[8 hrs]
+		NewEmail	(Correspondence)	[4 hrs]
+		ProjectLocation (Google Maps)	[6 hrs]
+		Subscription	(Monthly charge, email to RCS etc.)
+
+
