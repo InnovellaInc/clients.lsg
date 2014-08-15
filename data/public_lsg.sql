@@ -77,7 +77,7 @@ CREATE TABLE `tblresource` (
   PRIMARY KEY (`Resrc_id`,`Resrc_tp`),
   KEY `ix1Resource` (`Resrc_tp`),
   CONSTRAINT `fk1Resource` FOREIGN KEY (`Resrc_tp`) REFERENCES `tblresourcetype` (`Resrc_tp`)
-) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=79 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
 /*Table structure for table `tblresource_company` */
 
@@ -131,11 +131,13 @@ CREATE TABLE `tblresource_contact` (
   `DEL_dm` datetime DEFAULT NULL,
   `DEL_nm` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`Resrc_id`,`Resrc_tp`,`Contact_id`,`Contact_tp`),
-  UNIQUE KEY `akResource_Contact` (`Resrc_tp`,`Contact_id`,`Contact_tp`,`Contact_nm`),
+  UNIQUE KEY `akResource_Contact` (`Resrc_tp`,`Contact_tp`,`Contact_nm`),
   KEY `fk2Resource_Contact` (`Contact_tp`),
+  KEY `fk4Resource_Contact` (`Contact_id`,`Contact_tp`),
   CONSTRAINT `fk1Resource_Contact` FOREIGN KEY (`Resrc_tp`) REFERENCES `tblresourcetype` (`Resrc_tp`),
   CONSTRAINT `fk2Resource_Contact` FOREIGN KEY (`Contact_tp`) REFERENCES `tblcontacttype` (`Contact_tp`),
-  CONSTRAINT `fk3Resource_Contact` FOREIGN KEY (`Resrc_id`, `Resrc_tp`) REFERENCES `tblresource` (`Resrc_id`, `Resrc_tp`)
+  CONSTRAINT `fk3Resource_Contact` FOREIGN KEY (`Resrc_id`, `Resrc_tp`) REFERENCES `tblresource` (`Resrc_id`, `Resrc_tp`),
+  CONSTRAINT `fk4Resource_Contact` FOREIGN KEY (`Contact_id`, `Contact_tp`) REFERENCES `tblresource` (`Resrc_id`, `Resrc_tp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
 /*Table structure for table `tblresourcetype` */
@@ -1776,19 +1778,20 @@ DELIMITER ;
 DELIMITER $$
 
 /*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `gfpResource_Contact`(
-	Resrc_id		INT SIGNED		-- PK1 
-,	Resrc_tp		VARCHAR(64)		-- PK2 AK1
-,	Contact_id		INT SIGNED		-- PK1 
-,	Contact_tp		VARCHAR(64)		-- PK2 AK1
-,	Contact_nm		VARCHAR(256)		--  AK2
-,	Contact_cd		VARCHAR(128)	
-,	Alias_nm		VARCHAR(256)		--  AK2
+	Resrc_id	INT SIGNED		-- PK1 
+,	Resrc_tp	VARCHAR(64)		-- PK2 AK1
+,	Contact_id	INT SIGNED		-- PK1 
+,	Contact_tp	VARCHAR(64)		-- PK2 AK1
+,	Contact_nm	VARCHAR(256)		--  AK2
+,	Contact_cd	VARCHAR(128)	
+,	Alias_nm	VARCHAR(256)		--  AK2
 ,	Address_nm	VARCHAR(256)
 ,	City_cd		VARCHAR(128)
 ,	State_cd	VARCHAR(128)
 ,	Zip_cd		VARCHAR(128)
 ,	Phone_cd	VARCHAR(128)
 ,	GPS_cd		VARCHAR(128)
+,	Resrc_tx	MEDIUMTEXT	
 ,	Contact_tx	MEDIUMTEXT	
 ,	ADD_dm		DATETIME	
 ,	ADD_nm		VARCHAR(256)	
@@ -1842,6 +1845,7 @@ BEGIN
 	IF ZIP_cd IS NULL OR ZIP_cd = '' THEN SET ZIP_cd = '-2147483647';	END IF;
 	IF Phone_cd IS NULL OR Phone_cd = '' THEN SET Phone_cd = '-2147483647';	END IF;
 	IF GPS_cd IS NULL OR GPS_cd = '' THEN SET GPS_cd = '-2147483647';	END IF;
+	IF Resrc_tx IS NULL OR Resrc_tx = '' THEN SET Resrc_tx = '-2147483647';	END IF;
 	IF Contact_tx IS NULL OR Contact_tx = '' THEN SET Contact_tx = '-2147483647';	END IF;
 	IF ADD_dm IS NULL THEN SET ADD_dm = CAST('0000-00-00 00:00:00' AS DATETIME);	END IF;
 	IF ADD_nm IS NULL OR ADD_nm = '' THEN SET ADD_nm = '-2147483647';	END IF;
@@ -1921,6 +1925,18 @@ BEGIN
 		;
 		LEAVE GFP;
 	END IF;
+	IF	Key_cd	= 'FK4'
+	THEN
+		SELECT	*
+		FROM
+			tvwResource_Contact
+		WHERE   1=1
+		AND	tvwResource_Contact.Contact_id	= Contact_id
+		AND	tvwResource_Contact.Contact_tp	= Contact_tp
+		AND	tvwResource_Contact.DEL_dm	IS NULL
+		;
+		LEAVE GFP;
+	END IF;
 	#######################################################################
 	-- Alternate Key lookup
 	#######################################################################
@@ -1930,10 +1946,9 @@ BEGIN
 		FROM
 			tvwResource_Contact
 		WHERE	1=1
+		AND	tvwResource_Contact.Resrc_id	= Resrc_id
 		AND	tvwResource_Contact.Resrc_tp	= Resrc_tp
-		AND	tvwResource_Contact.Contact_id	= Contact_id
 		AND	tvwResource_Contact.Contact_tp	= Contact_tp
-		AND	tvwResource_Contact.Contact_nm	= Contact_nm
 		;
 		LEAVE GFP;
 	END IF;
@@ -2005,6 +2020,10 @@ BEGIN
 		AND	(
 			tvwResource_Contact.Contact_tx	LIKE CONCAT('%', Contact_tx, '%')
 		OR	Contact_tx	LIKE '-2147483647'
+			)
+		AND	(
+			tvwResource_Contact.Resrc_tx	LIKE CONCAT('%', Resrc_tx, '%')
+		OR	Resrc_tx	LIKE '-2147483647'
 			)
  		AND	(
  			tvwResource_Contact.ADD_dm	>= ADD_dm
@@ -3310,6 +3329,230 @@ END	ISP;
 END */$$
 DELIMITER ;
 
+/* Procedure structure for procedure `ispContactType` */
+
+/*!50003 DROP PROCEDURE IF EXISTS  `ispContactType` */;
+
+DELIMITER $$
+
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `ispContactType`(
+	Contact_tp		VARCHAR(64)		-- PK1 
+,	ParentContact_tp		VARCHAR(64)	
+,	ContactType_tx		MEDIUMTEXT	
+,	ContactTypeLeft_id		INT SIGNED	
+,	ContactTypeRight_id		INT SIGNED	
+,	ContactTypeLevel_id		INT SIGNED	
+,	ContactTypeOrder_id		INT SIGNED	
+,	CallingProc_nm	VARCHAR(128)	-- CallingProc	The sproc calling this proc
+,	Source_nm	VARCHAR(128)	-- SourceContact	Contact name
+,	Token_cd	VARCHAR(64)	-- Token	Security Token
+,	Mode_cd		VARCHAR(16)	-- Mode	Database cascade mode code
+)
+BEGIN
+/*
+**	Name:		ispContactType
+**	Type:		DB API procedure: Insert
+**	Purpose:	To insert ContactType data into tblContactType
+**	Author:		Solomon S. Shacter
+**	Organization:	Innovella, Inc.
+**
+**	Modified:	6/14/2013
+**	Modnumber:	00
+**	Modification:	Original
+**
+*/
+###############################################################################
+DECLARE	SYSTABLE	VARCHAR(255) DEFAULT 'tblContactType';
+DECLARE	SYSRIGHT	VARCHAR(40) DEFAULT 'INSERT';
+DECLARE	Proc_nm	VARCHAR(255) DEFAULT 'ispContactType';
+DECLARE	Key_cd		VARCHAR(16) DEFAULT 'PK';
+DECLARE RowExists_fg	TINYINT	DEFAULT 0;
+DECLARE ProcFailed_fg	BOOLEAN DEFAULT FALSE;
+DECLARE	FK1		VARCHAR(255) DEFAULT CONCAT(Contact_tp);
+###############################################################################
+ISP:
+BEGIN
+	#######################################################################
+	-- Initialize
+	#######################################################################
+	IF Source_nm IS NULL OR Source_nm = '' THEN SET Source_nm = '';	END IF;
+	IF Token_cd IS NULL OR Token_cd = '' THEN SET Token_cd = '';	END IF;
+	IF Mode_cd IS NULL OR Mode_cd = '' THEN SET Mode_cd = 'R';	END IF;
+	#######################################################################
+	-- Verify Correct Use of Database Mode
+	#######################################################################
+	IF	Mode_cd	= 'R'
+	OR	Mode_cd	= 'C'
+	OR	Mode_cd	= 'H'
+	OR	Mode_cd	= 'N'
+	THEN
+		SET ProcFailed_fg	= FALSE;
+	ELSE
+		SET ProcFailed_fg	= TRUE;
+		CALL 	errFailedMode
+		(
+			@Proc_nm	:= Proc_nm
+		,	@Mode_cd	:= Mode_cd
+		,	@Action_nm	:= SYSRIGHT
+		,	@Table_nm	:= SYSTABLE
+		);
+		LEAVE	ISP;
+	END IF;
+	#######################################################################
+	-- Return if Primary Key TABLE record exists
+	#######################################################################
+	CALL	rspContactType
+	(
+		@Contact_tp	:= Contact_tp
+	,	@Key_cd		:= Key_cd
+	,	@RowExists_fg
+	);
+	IF
+		@RowExists_fg	= 1	-- If PK exists then return without error
+	THEN
+		IF
+			CallingProc_nm	IS NULL OR CallingProc_nm = ''
+		THEN
+			SELECT
+				Contact_tp
+			;
+		END IF;
+		LEAVE	ISP;
+	END IF;
+	IF
+		CallingProc_nm	= "ispResource_Contact"
+	THEN
+		SET ProcFailed_fg	= TRUE;
+		CALL 	errFKNotExist
+		(
+			@Proc_nm	:= Proc_nm
+		,	@Table_nm	:= SYSTABLE
+		,	@Action_nm	:= SYSRIGHT
+		,	@Key_nm		:= FK1
+		);
+		CALL 	errFailedMode
+		(
+			@Proc_nm	:= Proc_nm
+		,	@Mode_cd	:= Mode_cd
+		,	@Action_nm	:= SYSRIGHT
+		,	@Table_nm	:= SYSTABLE
+		);
+		LEAVE	ISP;
+	END IF;
+	#######################################################################
+	-- Return if Alternate Key VIEW record exists
+	#######################################################################
+	#######################################################################
+	-- Validate attributes
+	#######################################################################
+	#######################################################################
+	-- Check Referential Integerity
+	#######################################################################
+	--
+	--	RESTRICT MODE:	tblResourceType
+	--
+	IF
+		@Mode_cd	= 'R'
+	THEN
+		SET 	@TABLE	= "tblResourceType";
+		CALL	rspResourceType
+		(
+			@Resrc_tp	:= Contact_tp
+		,	@ParentResrc_tp	:= ParentContact_tp
+		,	@ResrcType_tx	:= ContactType_tx
+		,	@Left_id	:= ContactTypeLeft_id
+		,	@Right_id	:= ContactTypeRight_id
+		,	@Level_id	:= ContactTypeLevel_id
+		,	@Order_id	:= ContactTypeOrder_id
+		,	@Key_cd		:= Key_cd
+		,	@RowExists_fg
+		);
+		IF
+			@RowExists_fg	= 0   -- Foreign key in tblResourceType not found!
+		THEN
+			SET ProcFailed_fg	= TRUE;
+			CALL 	errFKNotExist
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Table_nm	:= @TABLE
+			,	@Action_nm	:= SYSRIGHT
+			,	@Key_nm		:= FK1
+			);
+			CALL 	errFailedMode
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Mode_cd	:= Mode_cd
+			,	@Action_nm	:= SYSRIGHT
+			,	@Table_nm	:= @TABLE
+			);
+			LEAVE	ISP;
+		END IF;
+	END IF;
+	--
+	--	CASCADE MODE:	tblResourceType
+	--
+	IF
+		@Mode_cd	= 'C'
+	THEN
+		CALL	ispResourceType
+		(
+			@Resrc_tp	:= Contact_tp
+		,	@ParentResrc_tp	:= ParentContact_tp
+		,	@ResrcType_tx	:= ContactType_tx
+		,	@Left_id	:= ContactTypeLeft_id
+		,	@Right_id	:= ContactTypeRight_id
+		,	@Level_id	:= ContactTypeLevel_id
+		,	@Order_id	:= ContactTypeOrder_id
+		,	@CallingProc_nm	:= Proc_nm
+		,	@Source_nm	:= Source_nm
+		,	@Token_cd	:= Token_cd
+		,	@Mode_cd	:= 'R'	-- This Table Is Restricted and Does Not Allow A Cascade From an FK Table.
+		);
+	END IF;
+	#######################################################################
+	-- Insert values
+	#######################################################################
+BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+	BEGIN
+		SET ProcFailed_fg	= TRUE;
+		CALL 	errFailedContact
+		(
+			@Proc_nm	:= Proc_nm
+		,	@Table_nm	:= SYSTABLE
+		,	@Action_nm	:= SYSRIGHT
+		);
+	END;
+	INSERT
+	INTO	tblContactType
+	(
+		Contact_tp
+	)
+	VALUES
+	(
+		Contact_tp
+	);
+END;
+	#######################################################################
+	-- Insert this transaction in the transaction history log
+	#######################################################################
+	#######################################################################
+	-- Return the Primary Key to the front-end if this procedure
+	-- was not called from another API stored procedure.
+	#######################################################################
+ 	IF
+ 		CallingProc_nm	IS NULL OR CallingProc_nm = ''
+ 	THEN
+		SELECT
+			@Contact_tp	AS Contact_tp
+ 		;
+ 	END IF;
+	#######################################################################
+END	ISP;
+###############################################################################
+END */$$
+DELIMITER ;
+
 /* Procedure structure for procedure `ispResource` */
 
 /*!50003 DROP PROCEDURE IF EXISTS  `ispResource` */;
@@ -3881,18 +4124,18 @@ DELIMITER ;
 
 DELIMITER $$
 
-/*!50003 CREATE DEFINER=`innovella`@`localhost` PROCEDURE `ispResource_Company`(
-INOUT	Resrc_id		INT SIGNED		-- PK1 
-,	Resrc_tp		VARCHAR(64)		-- PK2 AK1
-,INOUT	Company_id		INT SIGNED		-- PK1 
-,	Company_tp		VARCHAR(64)		-- PK2 AK1
-,	Resrc_nm		VARCHAR(256)		--  AK2
-,	Resrc_cd		VARCHAR(128)	
-,	Alias_nm		VARCHAR(256)
-,	Company_nm		VARCHAR(256)
-,	Company_cd		VARCHAR(128)	
-,	Resrc_tx		MEDIUMTEXT	
-,	Company_tx		MEDIUMTEXT	
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `ispResource_Company`(
+INOUT	Resrc_id	INT SIGNED		-- PK1 
+,	Resrc_tp	VARCHAR(64)		-- PK2 AK1
+,INOUT	Company_id	INT SIGNED		-- PK1 
+,	Company_tp	VARCHAR(64)		-- PK2 AK1
+,	Resrc_nm	VARCHAR(256)		--  AK2
+,	Resrc_cd	VARCHAR(128)	
+,	Alias_nm	VARCHAR(256)
+,	Company_nm	VARCHAR(256)
+,	Company_cd	VARCHAR(128)	
+,	Resrc_tx	MEDIUMTEXT	
+,	Company_tx	MEDIUMTEXT	
 ,	ADD_dm		DATETIME	
 ,	ADD_nm		VARCHAR(128)	
 ,	UPD_dm		DATETIME	
@@ -4374,6 +4617,577 @@ END;
 		,	Company_tp
 		,	Resrc_nm
 		,	Company_nm
+		;
+ 	END IF;
+	#######################################################################
+END ISP;
+###############################################################################
+END */$$
+DELIMITER ;
+
+/* Procedure structure for procedure `ispResource_Contact` */
+
+/*!50003 DROP PROCEDURE IF EXISTS  `ispResource_Contact` */;
+
+DELIMITER $$
+
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `ispResource_Contact`(
+INOUT	Resrc_id	INT SIGNED		-- PK1 
+,	Resrc_tp	VARCHAR(64)		-- PK2 AK1
+,INOUT	Contact_id	INT SIGNED		-- PK1 
+,	Contact_tp	VARCHAR(64)		-- PK2 AK1
+,	Contact_nm	VARCHAR(256)		--  AK2
+,	Contact_cd	VARCHAR(128)	
+,	Alias_nm	VARCHAR(256)
+,	Address_nm	VARCHAR(256)
+,	City_cd		VARCHAR(128)
+,	State_cd	VARCHAR(128)
+,	Zip_cd		VARCHAR(128)
+,	Phone_cd	VARCHAR(128)
+,	GPS_cd		VARCHAR(128)
+,	Resrc_tx	MEDIUMTEXT	
+,	Contact_tx	MEDIUMTEXT	
+,	ADD_dm		DATETIME	
+,	ADD_nm		VARCHAR(128)	
+,	UPD_dm		DATETIME	
+,	UPD_nm		VARCHAR(128)	
+,	DEL_dm		DATETIME	
+,	DEL_nm		VARCHAR(128)	
+,	CallingProc_nm	VARCHAR(128)	-- CallingProc	The sproc calling this proc
+,	Source_nm	VARCHAR(128)	-- SourceSystem	System name
+,	Token_cd	VARCHAR(64)	-- Token	Security Token
+,	Mode_cd		VARCHAR(16)	-- Mode	Database cascade mode code
+)
+BEGIN
+/*
+**	Name:		ispResource_Contact
+**	Type:		DB API procedure: Insert
+**	Purpose:	To insert Resource data into tblResource_Contact
+**	Author:		Solomon S. Shacter
+**	Organization:	Innovella, Inc.
+**
+**	Modified:	4/12/2013
+**	Modnumber:	00
+**	Modification:	Original
+**
+*/
+###############################################################################
+DECLARE	SYSTABLE	VARCHAR(255) DEFAULT 'tblResource_Contact';
+DECLARE	SYSRIGHT	VARCHAR(40) DEFAULT 'INSERT';
+DECLARE	Proc_nm	VARCHAR(255) DEFAULT 'ispResource_Contact';
+DECLARE	Key_cd		VARCHAR(16) DEFAULT 'PK';
+DECLARE RowExists_fg	TINYINT	DEFAULT 0;
+DECLARE ProcFailed_fg	BOOLEAN DEFAULT FALSE;
+###############################################################################
+ISP:
+BEGIN
+	#######################################################################
+	-- Initialize
+	#######################################################################
+	IF CallingProc_nm IS NULL OR CallingProc_nm = '' THEN SET CallingProc_nm = '';	END IF;
+	IF Source_nm IS NULL OR Source_nm = '' THEN SET Source_nm = '';	END IF;
+	IF Token_cd IS NULL OR Token_cd = '' THEN SET Token_cd = '';	END IF;
+	IF Mode_cd IS NULL OR Mode_cd = '' THEN SET Mode_cd = 'R';	END IF;
+	IF Resrc_id = '0' OR Resrc_id = 0 THEN SET Resrc_id =  NULL;	END IF;
+	IF Resrc_tp IS NULL OR Resrc_tp = '' THEN SET Resrc_tp = NULL;	END IF;
+	IF Contact_id = '0' OR Contact_id = 0 THEN SET Contact_id =  NULL;	END IF;
+	IF Contact_tp IS NULL OR Contact_tp = '' THEN SET Contact_tp = NULL;	END IF;
+	IF Contact_nm IS NULL OR Contact_nm = '' THEN SET Contact_nm = NULL;	END IF;
+	IF Contact_cd IS NULL OR Contact_cd = '' THEN SET Contact_cd = NULL;	END IF;
+	IF Alias_nm IS NULL OR Alias_nm = '' THEN SET Alias_nm = NULL;	END IF;
+	IF Address_nm IS NULL OR Address_nm = '' THEN SET Address_nm = null;	END IF;
+	IF City_cd IS NULL OR City_cd = '' THEN SET City_cd = NULL;	END IF;
+	IF State_cd IS NULL OR State_cd = '' THEN SET State_cd = NULL;	END IF;
+	IF ZIP_cd IS NULL OR ZIP_cd = '' THEN SET ZIP_cd = NULL;	END IF;
+	IF Phone_cd IS NULL OR Phone_cd = '' THEN SET Phone_cd = NULL;	END IF;
+	IF GPS_cd IS NULL OR GPS_cd = '' THEN SET GPS_cd = NULL;	END IF;
+	IF Resrc_tx IS NULL OR Resrc_tx = '' THEN SET Resrc_tx = NULL;	END IF;
+	IF Contact_tx IS NULL OR Contact_tx = '' THEN SET Contact_tx = NULL;	END IF;
+-- 	IF ADD_dm IS NULL THEN SET ADD_dm = CAST('0000-00-00 00:00:00' AS DATETIME);	END IF;
+ 	IF ADD_nm IS NULL OR ADD_nm = '' THEN SET ADD_nm = NULL;	END IF;
+-- 	IF UPD_dm IS NULL THEN SET UPD_dm = CAST('0000-00-00 00:00:00' AS DATETIME);	END IF;
+ 	IF UPD_nm IS NULL OR UPD_nm = '' THEN SET UPD_nm = NULL;	END IF;
+-- 	IF DEL_dm IS NULL THEN SET DEL_dm = CAST('0000-00-00 00:00:00' AS DATETIME);	END IF;
+ 	IF DEL_nm IS NULL OR DEL_nm = '' THEN SET DEL_nm = NULL;	END IF;
+	SET	@PK1	= CONCAT(IFNULL(Resrc_id,"(null)"),",",Resrc_tp,",",IFNULL(Contact_id,"(null)"),",",Contact_tp);
+	SET	@FK1	= CONCAT(Resrc_tp);
+	SET	@FK2	= CONCAT(Contact_tp);
+	SET	@FK3	= CONCAT(IFNULL(Resrc_id,"(null)"),",",Resrc_tp);
+	SET	@FK4	= CONCAT(IFNULL(Contact_id,"(null)"),",",Contact_tp);
+	SET	@AK1	= CONCAT(IFNULL(Resrc_id,"(null)"),",",Resrc_tp,",",Contact_tp);
+	#######################################################################
+	-- Verify Correct Use of Database Mode
+	#######################################################################
+	IF	Mode_cd	= 'R'
+	OR	Mode_cd	= 'C'
+	OR	Mode_cd	= 'H'
+	OR	Mode_cd	= 'N'
+	THEN
+		SET ProcFailed_fg	= FALSE;
+	ELSE
+		SET ProcFailed_fg	= TRUE;
+		CALL 	errFailedMode
+		(
+			@Proc_nm	:= Proc_nm
+		,	@Mode_cd	:= Mode_cd
+		,	@Action_nm	:= SYSRIGHT
+		,	@Table_nm	:= 'tblResource_Contact'
+		);
+		LEAVE	ISP;
+	END IF;
+	#######################################################################
+	-- Return if Primary Key TABLE record exists
+	#######################################################################
+	CALL	rspResource_Contact
+	(
+		@Resrc_id	:= Resrc_id
+	,	@Resrc_tp	:= Resrc_tp
+	,	@Contact_id	:= Contact_id
+	,	@Contact_tp	:= Contact_tp
+	,	@Contact_nm	:= Contact_nm
+	,	@Contact_cd	:= Contact_cd
+	,	@Alias_nm	:= Alias_nm
+	,	@Address_nm	:= Address_nm
+	,	@City_cd	:= City_cd
+	,	@State_cd	:= State_cd
+	,	@Zip_cd		:= Zip_cd
+	,	@Phone_cd	:= Phone_cd
+	,	@GPS_cd		:= GPS_cd
+	,	@ADD_dm	:= ADD_dm
+	,	@ADD_nm	:= ADD_nm
+	,	@UPD_dm	:= UPD_dm
+	,	@UPD_nm	:= UPD_nm
+	,	@DEL_dm	:= DEL_dm
+	,	@DEL_nm	:= DEL_nm
+	,	@Key_cd	:= Key_cd
+	,	@RowExists_fg
+	);
+	IF
+		@RowExists_fg	= 1	-- If PK exists then return without error
+	THEN
+		IF
+			CallingProc_nm	IS NULL OR CallingProc_nm = ''
+		THEN
+			SELECT
+				Resrc_id
+			,	Resrc_tp
+			,	Contact_id
+			,	Contact_tp
+			,	Contact_nm
+			;
+		END IF;
+		LEAVE	ISP;
+	END IF;
+	#######################################################################
+	-- Return if Alternate Key VIEW record exists
+	#######################################################################
+	SELECT
+		tvwResource_Contact.Resrc_id
+	,	tvwResource_Contact.Resrc_tp
+	,	tvwResource_Contact.Contact_id
+	,	tvwResource_Contact.Contact_tp
+	,	tvwResource_Contact.Contact_nm
+	INTO
+		Resrc_id
+	,	Resrc_tp
+	,	Contact_id
+	,	Contact_tp
+	,	Contact_nm
+	FROM
+		tvwResource_Contact
+	WHERE	1=1
+	AND	tvwResource_Contact.Resrc_id	= Resrc_id
+	AND	tvwResource_Contact.Resrc_tp	= Resrc_tp
+	AND	tvwResource_Contact.Contact_tp	= Contact_tp
+	;
+	IF
+		FOUND_ROWS()	> 0
+	THEN
+		IF
+			CallingProc_nm	IS NULL OR CallingProc_nm = ''
+		THEN
+			SELECT
+				Resrc_id
+			,	Resrc_tp
+			,	Contact_id
+			,	Contact_tp
+			,	Contact_nm
+			;
+		END IF;
+		LEAVE	ISP;
+	END IF;
+	#######################################################################
+	-- Validate attributes
+	#######################################################################
+	SET 	@ADD_dm	= ADD_dm;
+	SET 	@ADD_nm	= ADD_nm;
+	SET 	@UPD_dm	= UPD_dm;
+	SET 	@UPD_nm	= UPD_nm;
+	SET 	@DEL_dm	= DEL_dm;
+	SET 	@DEL_nm	= DEL_nm;
+	CALL	vspResource_Contact
+	(
+		@Resrc_id	:= Resrc_id
+	,	@Resrc_tp	:= Resrc_tp
+	,	@Contact_id	:= Contact_id
+	,	@Contact_tp	:= Contact_tp
+	,	@Contact_nm	:= Contact_nm
+	,	@Contact_cd	:= Contact_cd
+	,	@Alias_nm	:= Alias_nm	
+	,	@Address_nm	:= Address_nm
+	,	@City_cd	:= City_cd
+	,	@State_cd	:= State_cd
+	,	@Zip_cd		:= Zip_cd
+	,	@Phone_cd	:= Phone_cd
+	,	@GPS_cd		:= GPS_cd
+	,	@ADD_dm
+	,	@ADD_nm
+	,	@UPD_dm
+	,	@UPD_nm
+	,	@DEL_dm
+	,	@DEL_nm
+	,	@SYSRIGHT	:= SYSRIGHT
+	,	@Mode_cd	:= Mode_cd
+	,	@IsValid_fg
+	);
+	IF	@IsValid_fg	= FALSE
+	THEN
+		SET ProcFailed_fg	= TRUE;
+		CALL 	errFailedCall
+		(
+			@Proc_nm	:= Proc_nm
+		,	@CallingProc_nm	:= 'vspResource_Contact'
+		);
+		LEAVE	ISP;
+	END IF;
+	SET 	ADD_dm	= @ADD_dm;
+	SET 	ADD_nm	= @ADD_nm;
+	SET 	UPD_dm	= @UPD_dm;
+	SET 	UPD_nm	= @UPD_nm;
+	SET 	DEL_dm	= @DEL_dm;
+	SET 	DEL_nm	= @DEL_nm;
+	#######################################################################
+	-- Check Referential Integerity
+	#######################################################################
+	SET	@FK1	= CONCAT(Resrc_tp);
+	SET	@FK2	= CONCAT(Contact_tp);
+	SET	@FK3	= CONCAT(IFNULL(Resrc_id,"(null)"),",",Resrc_tp);
+	SET	@FK4	= CONCAT(IFNULL(Contact_id,"(null)"),",",Contact_tp);
+	SET	@AK1	= CONCAT(IFNULL(Resrc_id,"(null)"),",",Resrc_tp,",",Contact_tp);
+	--
+	--	RESTRICT MODE:
+	--
+	IF
+		Mode_cd	= 'R'
+	THEN
+		SET 	@TABLE	= "tblResourceType";
+		CALL	rspResourceType
+		(
+			@Resrc_tp	:= Resrc_tp
+		,	@ParentResrc_tp	:= NULL
+		,	@ResrcType_tx	:= NULL
+		,	@Left_id	:= NULL
+		,	@Right_id	:= NULL
+		,	@Level_id	:= NULL
+		,	@Order_id	:= NULL
+		,	@Key_cd		:= Key_cd
+		,	@RowExists_fg
+		);
+		IF
+			@RowExists_fg	= 0   -- Foreign key in parent table not found!
+		THEN
+			SET ProcFailed_fg	= TRUE;
+			CALL 	errFKNotExist
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Table_nm	:= @TABLE
+			,	@Action_nm	:= SYSRIGHT
+			,	@Key_nm		:= @FK1
+			);
+			CALL 	errFailedMode
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Mode_cd	:= Mode_cd
+			,	@Action_nm	:= SYSRIGHT
+			,	@Table_nm	:= @TABLE
+			);
+			LEAVE	ISP;
+		END IF;
+		SET 	@TABLE	= "tblContactType";
+		CALL	rspContactType
+		(
+			@Contact_tp	:= Contact_tp
+		,	@Key_cd		:= Key_cd
+		,	@RowExists_fg
+		);
+		IF
+			@RowExists_fg	= 0   -- Foreign key in parent table not found!
+		THEN
+			SET ProcFailed_fg	= TRUE;
+			CALL 	errFKNotExist
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Table_nm	:= @TABLE
+			,	@Action_nm	:= SYSRIGHT
+			,	@Key_nm		:= @FK2
+			);
+			CALL 	errFailedMode
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Mode_cd	:= Mode_cd
+			,	@Action_nm	:= SYSRIGHT
+			,	@Table_nm	:= @TABLE
+			);
+			LEAVE	ISP;
+		END IF;
+		SET 	@TABLE	= "tblResource";	-- Contact
+		CALL	rspResource
+		(
+			@Resrc_id	:= Contact_id
+		,	@Resrc_tp	:= Contact_tp
+		,	@Resrc_tx	:= Contact_tx
+		,	@ADD_dm	:= ADD_dm
+		,	@ADD_nm	:= ADD_nm
+		,	@UPD_dm	:= UPD_dm
+		,	@UPD_nm	:= UPD_nm
+		,	@DEL_dm	:= DEL_dm
+		,	@DEL_nm	:= DEL_nm
+		,	@Key_cd		:= Key_cd
+		,	@RowExists_fg
+		);
+		IF
+			@RowExists_fg	= 0   -- Foreign key in parent table not found!
+		THEN
+			SET ProcFailed_fg	= TRUE;
+			CALL 	errFKNotExist
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Table_nm	:= @TABLE
+			,	@Action_nm	:= SYSRIGHT
+			,	@Key_nm		:= @FK4
+			);
+			CALL 	errFailedMode
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Mode_cd	:= Mode_cd
+			,	@Action_nm	:= SYSRIGHT
+			,	@Table_nm	:= @TABLE
+			);
+			LEAVE	ISP;
+		END IF;
+		SET 	@TABLE	= "tblResource";	-- Resource
+		CALL	rspResource
+		(
+			@Resrc_id	:= Resrc_id
+		,	@Resrc_tp	:= Resrc_tp
+		,	@Resrc_tx	:= Resrc_tx
+		,	@ADD_dm	:= ADD_dm
+		,	@ADD_nm	:= ADD_nm
+		,	@UPD_dm	:= UPD_dm
+		,	@UPD_nm	:= UPD_nm
+		,	@DEL_dm	:= DEL_dm
+		,	@DEL_nm	:= DEL_nm
+		,	@Key_cd		:= Key_cd
+		,	@RowExists_fg
+		);
+		IF
+			@RowExists_fg	= 0   -- Foreign key in parent table not found!
+		THEN
+			SET ProcFailed_fg	= TRUE;
+			CALL 	errFKNotExist
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Table_nm	:= @TABLE
+			,	@Action_nm	:= SYSRIGHT
+			,	@Key_nm		:= @FK3
+			);
+			CALL 	errFailedMode
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Mode_cd	:= Mode_cd
+			,	@Action_nm	:= SYSRIGHT
+			,	@Table_nm	:= @TABLE
+			);
+			LEAVE	ISP;
+		END IF;
+	END IF;
+	--
+	--	CASCADE MODE:
+	--
+	IF
+		Mode_cd	= 'C'
+	THEN
+		--	-------------------------------------------------------
+		SET 	@TABLE	= "tblResource";	-- Contact
+		SET	@Resrc_id	= Contact_id;
+		CALL	ispResource
+		(
+			@Resrc_id
+		,	@Resrc_tp	:= Contact_tp
+		,	@Resrc_tx	:= Contact_tx
+		,	@ADD_dm		:= ADD_dm
+		,	@ADD_nm		:= ADD_nm
+		,	@UPD_dm		:= UPD_dm
+		,	@UPD_nm		:= UPD_nm
+		,	@DEL_dm		:= DEL_dm
+		,	@DEL_nm		:= DEL_nm
+		,	@ParentResrc_tp	:= NULL
+		,	@ResrcType_tx	:= NULL
+		,	@Left_id	:= NULL
+		,	@Right_id	:= NULL
+		,	@Level_id	:= NULL
+		,	@Order_id	:= NULL
+		,	@CallingProc_nm	:= Proc_nm
+		,	@Source_nm	:= Source_nm
+		,	@Token_cd	:= Token_cd
+		,	@Mode_cd	:= Mode_cd
+		);
+		--	Set the proc IN parameters to the parent ISP INOUT parameters
+		SET	Contact_id	= @Resrc_id;
+		--	-------------------------------------------------------
+		SET 	@TABLE	= "tblResource";
+		SET	@Resrc_id	= Resrc_id;
+		CALL	ispResource
+		(
+			@Resrc_id
+		,	@Resrc_tp	:= Resrc_tp
+		,	@Resrc_tx	:= Resrc_tx
+		,	@ADD_dm		:= ADD_dm
+		,	@ADD_nm		:= ADD_nm
+		,	@UPD_dm		:= UPD_dm
+		,	@UPD_nm		:= UPD_nm
+		,	@DEL_dm		:= DEL_dm
+		,	@DEL_nm		:= DEL_nm
+		,	@ParentResrc_tp	:= NULL
+		,	@ResrcType_tx	:= NULL
+		,	@Left_id	:= NULL
+		,	@Right_id	:= NULL
+		,	@Level_id	:= NULL
+		,	@Order_id	:= NULL
+		,	@CallingProc_nm	:= Proc_nm
+		,	@Source_nm	:= Source_nm
+		,	@Token_cd	:= Token_cd
+		,	@Mode_cd	:= Mode_cd
+		);
+		--	Set the proc IN parameters to the parent ISP INOUT parameters
+		SET	Resrc_id	= @Resrc_id;
+		--	-------------------------------------------------------
+		--	-------------------------------------------------------
+	END IF;
+	#######################################################################
+	-- Return if Alternate Key VIEW record exists
+	#######################################################################
+	SELECT
+		tvwResource_Contact.Resrc_id
+	,	tvwResource_Contact.Resrc_tp
+	,	tvwResource_Contact.Contact_id
+	,	tvwResource_Contact.Contact_tp
+	,	tvwResource_Contact.Contact_nm
+	INTO
+		Resrc_id
+	,	Resrc_tp
+	,	Contact_id
+	,	Contact_tp
+	,	Contact_nm
+	FROM
+		tvwResource_Contact
+	WHERE	1=1
+	AND	tvwResource_Contact.Resrc_tp	= Resrc_tp
+	AND	tvwResource_Contact.Contact_tp	= Contact_tp
+	AND	tvwResource_Contact.Contact_nm	= Contact_nm
+	;
+	IF
+		FOUND_ROWS()	> 0
+	THEN
+		IF
+			CallingProc_nm	IS NULL OR CallingProc_nm = ''
+		THEN
+			SELECT
+				Resrc_id
+			,	Resrc_tp
+			,	Contact_id
+			,	Contact_tp
+			,	Contact_nm
+			;
+		END IF;
+		LEAVE	ISP;
+	END IF;
+	#######################################################################
+	-- Insert values
+	#######################################################################
+BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+	BEGIN
+		SET ProcFailed_fg	= TRUE;
+		CALL 	errFailedEvent
+		(
+			@Proc_nm	:= Proc_nm
+		,	@Table_nm	:= SYSTABLE
+		,	@Action_nm	:= SYSRIGHT
+		);
+	END;
+	INSERT
+	INTO	tblResource_Contact
+	(
+		Resrc_id
+	,	Resrc_tp
+	,	Contact_id
+	,	Contact_tp
+	,	Contact_nm
+	,	Contact_cd
+	,	Alias_nm
+	,	Address_nm
+	,	City_cd
+	,	State_cd
+	,	Zip_cd
+	,	Phone_cd
+	,	GPS_cd
+	,	ADD_dm
+	,	ADD_nm
+	,	UPD_dm
+	,	UPD_nm
+	,	DEL_dm
+	,	DEL_nm
+	)
+	VALUES
+	(
+		Resrc_id
+	,	Resrc_tp
+	,	Contact_id
+	,	Contact_tp
+	,	Contact_nm
+	,	Contact_cd
+	,	Alias_nm
+	,	Address_nm
+	,	City_cd
+	,	State_cd
+	,	Zip_cd
+	,	Phone_cd
+	,	GPS_cd
+	,	ADD_dm
+	,	ADD_nm
+	,	UPD_dm
+	,	UPD_nm
+	,	DEL_dm
+	,	DEL_nm
+	);
+END;
+	#######################################################################
+	-- Insert this transaction in the transaction history log
+	#######################################################################
+	#######################################################################
+	-- Return the Primary Key to the front-end if this procedure
+	-- was not called from another API stored procedure.
+	#######################################################################
+ 	IF
+ 		CallingProc_nm	IS NULL OR CallingProc_nm = ''
+ 	THEN
+		SELECT
+			Resrc_id
+		,	Resrc_tp
+		,	Contact_id
+		,	Contact_tp
+		,	Contact_nm
 		;
  	END IF;
 	#######################################################################
@@ -5025,6 +5839,14 @@ BEGIN
 **	Modified:	4/12/2013
 **	Modnumber:	00
 **	Modification:	Original
+**	NOTE: Special Case
+	AK in parent tblUser = User_tp, User_nm 
+	AK in tblResource_Company = Resrc_tp, Company_id, Company_tp, Resrc_nm
+	AK for "User_Company" = User_tp(tblResource_Company.Resrc_tp), Company_tp, Company_nm, User_nm(tblResource_Company.Resrc_nm)
+**
+	A user type and user name exists once in tblUser and once in tblCompany
+	A user type and user name exists once in tblUser but may exist once or more in tblResource_Conatct, tblResource_Project
+	A user may belong to more than one Group which may belong to one or more Companies
 **
 */
 ###############################################################################
@@ -5096,9 +5918,9 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 	,	@Resrc_tp	:= User_tp
 	,	@Company_id	:= Company_id
 	,	@Company_tp	:= Company_tp
-	,	@Resrc_nm	:= User_nm
-	,	@Company_cd	:= User_cd
-	,	@Alias_nm	:= Alias_nm
+	,	@Resrc_nm	:= NULL
+	,	@Resrc_cd	:= NULL
+	,	@Alias_nm	:= NULL
 	,	@ADD_dm	:= ADD_dm
 	,	@ADD_nm	:= ADD_nm
 	,	@UPD_dm	:= UPD_dm
@@ -5146,8 +5968,8 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 	AND	tvwUser_Company.User_tp	= User_tp
 	AND	tvwUser_Company.User_nm	= User_nm
 --	AND	tvwUser_Company.Company_id	= Company_id
-	AND	tvwUser_Company.Company_tp	= Company_tp
-	AND	tvwUser_Company.Company_nm	= Company_nm
+-- 	AND	tvwUser_Company.Company_tp	= Company_tp
+-- 	AND	tvwUser_Company.Company_nm	= Company_nm
 	;
 	IF
 		FOUND_ROWS()	> 0
@@ -5175,15 +5997,15 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 	SET 	@UPD_nm	= UPD_nm;
 	SET 	@DEL_dm	= DEL_dm;
 	SET 	@DEL_nm	= DEL_nm;
-	CALL	vspResource_Company
+	CALL	vspUser_Company
 	(
-		@Resrc_id	:= User_id
-	,	@Resrc_tp	:= User_tp
+		@User_id	:= User_id
+	,	@User_tp	:= User_tp
 	,	@Company_id	:= Company_id
 	,	@Company_tp	:= Company_tp
-	,	@Resrc_nm	:= User_nm
-	,	@Resrc_cd	:= User_cd
-	,	@Alias_nm	:= Alias_nm	
+	,	@User_nm	:= User_nm
+	,	@User_cd	:= User_cd
+	,	@Company_nm	:= Company_nm
 	,	@ADD_dm
 	,	@ADD_nm
 	,	@UPD_dm
@@ -5200,7 +6022,7 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 		CALL 	errFailedCall
 		(
 			@Proc_nm	:= Proc_nm
-		,	@CallingProc_nm	:= 'vspResource_Company'
+		,	@CallingProc_nm	:= 'vspUser_Company'
 		);
 		LEAVE	ISP;
 	END IF;
@@ -6446,6 +7268,299 @@ END	RSP
 END */$$
 DELIMITER ;
 
+/* Procedure structure for procedure `rspResource_Contact` */
+
+/*!50003 DROP PROCEDURE IF EXISTS  `rspResource_Contact` */;
+
+DELIMITER $$
+
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `rspResource_Contact`(
+	Resrc_id	INT SIGNED
+,	Resrc_tp	VARCHAR(64)
+,	Contact_id	INT SIGNED
+,	Contact_tp	VARCHAR(64)
+,	Contact_nm	VARCHAR(256)
+,	Contact_cd	VARCHAR(128)
+,	Alias_nm	VARCHAR(256)
+,	Address_nm	VARCHAR(256)
+,	City_cd		VARCHAR(128)
+,	State_cd	VARCHAR(128)
+,	Zip_cd		VARCHAR(128)
+,	Phone_cd	VARCHAR(128)
+,	GPS_cd		VARCHAR(128)
+,	ADD_dm		DATETIME
+,	ADD_nm		VARCHAR(256)
+,	UPD_dm		DATETIME
+,	UPD_nm		VARCHAR(256)
+,	DEL_dm		DATETIME
+,	DEL_nm		VARCHAR(256)
+,		Key_cd		VARCHAR(16)		-- = 'PK'	-- Search key code
+,	OUT 	RowExists_fg	TINYINT	
+)
+BEGIN
+/*
+**	Name:		rspResource_Contact
+**	Type:		DB API Procedure: Referential 
+**	Purpose:	Check existence of a record in tblResource_Contact
+**	Author:		Solomon S. Shacter
+**	Generated:	7/9/2013
+**
+**	Modified:	7/9/2013
+**	Modnumber:	00
+**	Modification:	Original
+**
+*/
+###############################################################################
+###############################################################################
+RSP:
+BEGIN
+	IF Key_cd IS NULL OR Key_cd = '' THEN SET Key_cd = 'PK';	END IF;
+	IF Resrc_id IS NULL OR Resrc_id = 0 THEN SET Resrc_id =  -2147483647;	END IF;
+	IF Resrc_tp IS NULL OR Resrc_tp = '' THEN SET Resrc_tp = '-2147483647';	END IF;
+	IF Contact_id IS NULL OR Contact_id = 0 THEN SET Contact_id =  -2147483647;	END IF;
+	IF Contact_tp IS NULL OR Contact_tp = '' THEN SET Contact_tp = '-2147483647';	END IF;
+	IF Contact_nm IS NULL OR Contact_nm = '' THEN SET Contact_nm = '-2147483647';	END IF;
+	IF Contact_cd IS NULL OR Contact_cd = '' THEN SET Contact_cd = '-2147483647';	END IF;
+	IF Alias_nm IS NULL OR Alias_nm = '' THEN SET Alias_nm = '-2147483647';	END IF;
+	IF Address_nm IS NULL OR Address_nm = '' THEN SET Address_nm = '-2147483647';	END IF;
+	IF City_cd IS NULL OR City_cd = '' THEN SET City_cd = '-2147483647';	END IF;
+	IF State_cd IS NULL OR State_cd = '' THEN SET State_cd = '-2147483647';	END IF;
+	IF ZIP_cd IS NULL OR ZIP_cd = '' THEN SET ZIP_cd = '-2147483647';	END IF;
+	IF Phone_cd IS NULL OR Phone_cd = '' THEN SET Phone_cd = '-2147483647';	END IF;
+	IF GPS_cd IS NULL OR GPS_cd = '' THEN SET GPS_cd = '-2147483647';	END IF;
+	IF ADD_dm IS NULL THEN SET ADD_dm = CAST('0000-00-00 00:00:00' AS DATETIME);	END IF;
+	IF ADD_nm IS NULL OR ADD_nm = '' THEN SET ADD_nm = '-2147483647';	END IF;
+	IF UPD_dm IS NULL THEN SET UPD_dm = CAST('0000-00-00 00:00:00' AS DATETIME);	END IF;
+	IF UPD_nm IS NULL OR UPD_nm = '' THEN SET UPD_nm = '-2147483647';	END IF;
+	IF DEL_dm IS NULL THEN SET DEL_dm = CAST('0000-00-00 00:00:00' AS DATETIME);	END IF;
+	IF DEL_nm IS NULL OR DEL_nm = '' THEN SET DEL_nm = '-2147483647';	END IF;
+	#######################################################################
+	-- Primary Key lookup
+	#######################################################################
+	IF 	Key_cd	= 'PK'
+	THEN
+		IF
+		EXISTS
+		(
+			SELECT	1
+			FROM
+				tblResource_Contact
+			WHERE	1=1
+			AND	tblResource_Contact.Resrc_id	= Resrc_id
+			AND	tblResource_Contact.Resrc_tp	= Resrc_tp
+			AND	tblResource_Contact.Contact_id	= Contact_id
+			AND	tblResource_Contact.Contact_tp	= Contact_tp
+		)
+		THEN
+			SET RowExists_fg	= 1;
+		ELSE
+			SET RowExists_fg	= 0;
+		END IF;
+		LEAVE RSP;
+	END IF;
+	#######################################################################
+	-- Foreign Key lookup
+	#######################################################################
+	IF	Key_cd = 'FK1'
+	THEN
+		IF
+		EXISTS
+		(
+			SELECT	1
+			FROM
+				tblResource_Contact
+			WHERE	1=1
+			AND	tblResource_Contact.Resrc_tp	= Resrc_tp
+		)
+		THEN
+			SET RowExists_fg	= 1;
+		ELSE
+			SET RowExists_fg	= 0;
+		END IF;
+		LEAVE RSP;
+	END IF;
+	IF	Key_cd = 'FK2'
+	THEN
+		IF
+		EXISTS
+		(
+			SELECT	1
+			FROM
+				tblResource_Contact
+			WHERE	1=1
+			AND	tblResource_Contact.Contact_tp	= Contact_tp
+		)
+		THEN
+			SET RowExists_fg	= 1;
+		ELSE
+			SET RowExists_fg	= 0;
+		END IF;
+		LEAVE RSP;
+	END IF;
+	IF	Key_cd = 'FK3'
+	THEN
+		IF
+		EXISTS
+		(
+			SELECT	1
+		    FROM
+			    tblResource_Contact
+		    WHERE   1=1
+		    AND	tblResource_Contact.Resrc_id	= Resrc_id
+		    AND	tblResource_Contact.Resrc_tp	= Resrc_tp
+		)
+		THEN
+			SET RowExists_fg	= 1;
+		ELSE
+			SET RowExists_fg	= 0;
+		END IF;
+		LEAVE RSP;
+	END IF;
+	IF	Key_cd = 'FK4'
+	THEN
+		IF
+		EXISTS
+		(
+			SELECT	1
+		    FROM
+			    tblResource_Contact
+		    WHERE   1=1
+		    AND	tblResource_Contact.Contact_id	= Contact_id
+		    AND	tblResource_Contact.Contact_tp	= Contact_tp
+		)
+		THEN
+			SET RowExists_fg	= 1;
+		ELSE
+			SET RowExists_fg	= 0;
+		END IF;
+		LEAVE RSP;
+	END IF;
+	#######################################################################
+	-- Alternate Key lookup
+	#######################################################################
+	IF	Key_cd = 'AK'
+	THEN
+		IF
+		EXISTS
+		(
+			SELECT	1
+			FROM
+				tblResource_Contact
+			WHERE	1=1
+			AND	tblResource_Contact.Resrc_id	= Resrc_id
+			AND	tblResource_Contact.Resrc_tp	= Resrc_tp
+			AND	tblResource_Contact.Contact_tp	= Contact_tp
+		)
+		THEN
+			SET RowExists_fg	= 1;
+		ELSE
+			SET RowExists_fg	= 0;
+		END IF;
+		LEAVE RSP;
+	END IF;
+	#######################################################################
+	-- Attribute lookup
+	#######################################################################
+	IF	Key_cd	= 'AL'
+	THEN
+		IF
+		EXISTS
+		(
+			SELECT	1
+			FROM
+				tblResource_Contact
+			WHERE	1=1
+			AND	(
+				tblResource_Contact.Resrc_id	= Resrc_id
+			OR	Resrc_id	=  -2147483647
+				)
+			AND	(
+				tblResource_Contact.Resrc_tp	= Resrc_tp
+			OR	Resrc_tp	= '-2147483647'
+				)
+			AND	(
+				tblResource_Contact.Contact_id	= Contact_id
+			OR	Contact_id	=  -2147483647
+				)
+			AND	(
+				tblResource_Contact.Contact_tp	= Contact_tp
+			OR	Contact_tp	= '-2147483647'
+				)
+			AND	(
+				tblResource_Contact.Contact_nm	= Contact_nm
+			OR	Contact_nm	= '-2147483647'
+				)
+			AND	(
+				tblResource_Contact.Contact_cd	= Contact_cd
+			OR	Contact_cd	= '-2147483647'
+				)
+			AND	(
+				tblResource_Contact.Alias_nm	= Alias_nm
+			OR	Alias_nm	= '-2147483647'
+				)
+			AND	(
+				tblResource_Contact.Address_nm	LIKE CONCAT('%', Address_nm, '%')
+			OR	Address_nm	= '-2147483647'
+				)
+			AND	(
+				tblResource_Contact.City_cd	LIKE CONCAT('%', City_cd, '%')
+			OR	City_cd	= '-2147483647'
+				)
+			AND	(
+				tblResource_Contact.State_cd	LIKE CONCAT('%', State_cd, '%')
+			OR	State_cd	= '-2147483647'
+				)
+			AND	(
+				tblResource_Contact.ZIP_cd	LIKE CONCAT('%', ZIP_cd, '%')
+			OR	ZIP_cd	= '-2147483647'
+				)
+			AND	(
+				tblResource_Contact.Phone_cd	LIKE CONCAT('%', Phone_cd, '%')
+			OR	Phone_cd	= '-2147483647'
+				)
+			AND	(
+				tblResource_Contact.GPS_cd	LIKE CONCAT('%', GPS_cd, '%')
+			OR	GPS_cd	= '-2147483647'
+				)
+			AND	(
+				tblResource_Contact.ADD_dm	= ADD_dm
+			OR	ADD_dm	= '0000-00-00 00:00:00'
+				)
+			AND	(
+				tblResource_Contact.ADD_nm	= ADD_nm
+			OR	ADD_nm	= '-2147483647'
+				)
+			AND	(
+				tblResource_Contact.UPD_dm	= UPD_dm
+			OR	UPD_dm	= '0000-00-00 00:00:00'
+				)
+			AND	(
+				tblResource_Contact.UPD_nm	= UPD_nm
+			OR	UPD_nm	= '-2147483647'
+				)
+			AND	(
+				tblResource_Contact.DEL_dm	= DEL_dm
+			OR	DEL_dm	= '0000-00-00 00:00:00'
+				)
+			AND	(
+				tblResource_Contact.DEL_nm	= DEL_nm
+			OR	DEL_nm	= '-2147483647'
+				)
+		)
+		THEN
+			SET RowExists_fg	= 1;
+		ELSE
+			SET RowExists_fg	= 0;
+		END IF;
+		LEAVE RSP;
+	END IF;
+	#######################################################################
+END	RSP
+;
+###############################################################################
+END */$$
+DELIMITER ;
+
 /* Procedure structure for procedure `rspUser` */
 
 /*!50003 DROP PROCEDURE IF EXISTS  `rspUser` */;
@@ -6738,7 +7853,7 @@ DELIMITER ;
 
 DELIMITER $$
 
-/*!50003 CREATE DEFINER=`innovella`@`localhost` PROCEDURE `uspCompany`(
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `uspCompany`(
 	Company_id		INT SIGNED		-- PK1 
 ,	Company_tp		VARCHAR(64)		-- PK2 AK1
 ,	Company_nm		VARCHAR(256)		--  AK2
@@ -6858,15 +7973,13 @@ BEGIN
 	-- Validate attributes
 	#######################################################################
 	--	Set the VSP INOUT parameters to the proc IN parameters
-	SET @Company_nm	= Company_nm;
-	SET @Company_cd	= Company_cd;
 	-- --------------------------------------------------------------------
 	CALL	vspCompany
 	(
 		@Company_id	:= Company_id
 	,	@Company_tp	:= Company_tp
-	,	@Company_nm
-	,	@Company_cd
+	,	@Company_nm	:= Company_nm
+	,	@Company_cd	:= Company_cd
 	,	@SYSRIGHT	:= SYSRIGHT
 	,	@Mode_cd	:= Mode_cd
 	,	@IsValid_fg
@@ -6882,8 +7995,6 @@ BEGIN
 		LEAVE	USP;
 	END IF;
 	--	Set the proc IN parameters to the VSP INOUT parameters
--- 	set Company_nm	= @Company_nm;
--- 	SET Company_cd	= @Company_cd;
 	#######################################################################
 	-- Check Referential Integerity
 	#######################################################################
@@ -7899,7 +9010,7 @@ DELIMITER ;
 
 DELIMITER $$
 
-/*!50003 CREATE DEFINER=`innovella`@`localhost` PROCEDURE `uspResource_Company`(
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `uspResource_Company`(
 	Resrc_id	INT SIGNED		-- PK1 
 ,	Resrc_tp	VARCHAR(64)		-- PK2 AK1
 ,	Company_id	INT SIGNED		-- PK1 
@@ -7971,7 +9082,7 @@ BEGIN
 	IF Company_tx IS NULL OR Company_tx = '' THEN SET Company_tx = '-2147483647';	END IF;
 	IF ADD_dm IS NULL THEN SET ADD_dm = CAST('0000-00-00 00:00:00' AS DATETIME);	END IF;
 	IF ADD_nm IS NULL OR ADD_nm = '' THEN SET ADD_nm = '-2147483647';	END IF;
-	IF UPD_dm IS NULL then SET UPD_dm = CAST('0000-00-00 00:00:00' AS DATETIME);	END IF;
+	IF UPD_dm IS NULL THEN SET UPD_dm = CAST('0000-00-00 00:00:00' AS DATETIME);	END IF;
 	IF UPD_nm IS NULL OR UPD_nm = '' THEN SET UPD_nm = '-2147483647';	END IF;
 	IF DEL_dm IS NULL THEN SET DEL_dm = CAST('0000-00-00 00:00:00' AS DATETIME);	END IF;
 	IF DEL_nm IS NULL OR DEL_nm = '' THEN SET DEL_nm = '-2147483647';	END IF;
@@ -8004,9 +9115,9 @@ BEGIN
 	,	@Resrc_tp	:= Resrc_tp
 	,	@Company_id	:= Company_id
 	,	@Company_tp	:= Company_tp
-	,	@Resrc_nm	:= Resrc_nm
-	,	@Resrc_cd	:= Resrc_cd
-	,	@Alias_nm	:= Alias_nm
+	,	@Resrc_nm	:= NULL
+	,	@Resrc_cd	:= NULL
+	,	@Alias_nm	:= NULL
 	,	@ADD_dm	:= ADD_dm
 	,	@ADD_nm	:= ADD_nm
 	,	@UPD_dm	:= UPD_dm
@@ -8244,15 +9355,18 @@ BEGIN
 	-- Update NON-KEY values
 	#######################################################################
 	-- --------------------------------------------------------------------
-	-- Invoke an UPDATE when a non-key attribute is actually modified.
+	-- Invoke an UPDATE when a non-key attribute if actually modified.
 	-- --------------------------------------------------------------------
 	IF
-		Resrc_cd	= '-2147483647'
+		Resrc_nm	= '-2147483647'
+	AND	Resrc_cd	= '-2147483647'
 	AND	Alias_nm	= '-2147483647'
-	AND	Company_nm	= '-2147483647'
-	AND	Company_cd	= '-2147483647'
-	AND	Resrc_tx	= '-2147483647'
-	AND	Company_tx	= '-2147483647'
+-- 	AND	ADD_dm	= '0000-00-00 00:00:00'
+-- 	AND	ADD_nm	= '-2147483647'
+	AND	UPD_dm	= '0000-00-00 00:00:00'
+	AND	UPD_nm	= '-2147483647'
+	AND	DEL_dm	= '0000-00-00 00:00:00'
+	AND	DEL_nm	= '-2147483647'
 	THEN
 		LEAVE	USP;
 	END IF;
@@ -8329,13 +9443,915 @@ END usp;
 END */$$
 DELIMITER ;
 
+/* Procedure structure for procedure `uspResource_Contact` */
+
+/*!50003 DROP PROCEDURE IF EXISTS  `uspResource_Contact` */;
+
+DELIMITER $$
+
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `uspResource_Contact`(
+	Resrc_id	INT SIGNED		-- PK1 
+,	Resrc_tp	VARCHAR(64)		-- PK2 AK1
+,	Contact_id	INT SIGNED		-- PK1 
+,	Contact_tp	VARCHAR(64)		-- PK2 AK1
+,	Contact_nm	VARCHAR(256)		--  AK2
+,	Contact_cd	VARCHAR(128)	
+,	Alias_nm	VARCHAR(256)
+,	Address_nm	VARCHAR(256)
+,	City_cd		VARCHAR(128)
+,	State_cd	VARCHAR(128)
+,	Zip_cd		VARCHAR(128)
+,	Phone_cd	VARCHAR(128)
+,	GPS_cd		VARCHAR(128)
+,	Resrc_tx	MEDIUMTEXT	
+,	Contact_tx	MEDIUMTEXT	
+,	ADD_dm		DATETIME	
+,	ADD_nm		VARCHAR(128)	
+,	UPD_dm		DATETIME	
+,	UPD_nm		VARCHAR(128)	
+,	DEL_dm		DATETIME	
+,	DEL_nm		VARCHAR(128)	
+,	CallingProc_nm	VARCHAR(128)	-- CallingProc	The sproc calling this proc
+,	Source_nm	VARCHAR(128)	-- SourceSystem	System name
+,	Token_cd	VARCHAR(64)	-- Token	Security Token
+,	Mode_cd		VARCHAR(16)	-- Mode	Database cascade mode code
+)
+BEGIN
+/*
+**	Name:		uspResource_Contact
+**	Type:		DB API procedure: Insert
+**	Purpose:	To insert Resource data into tblResource_Contact
+**	Author:		Solomon S. Shacter
+**	Organization:	Innovella, Inc.
+**
+**	Modified:	4/12/2013
+**	Modnumber:	00
+**	Modification:	Original
+**
+*/
+###############################################################################
+DECLARE	SYSTABLE	VARCHAR(255) DEFAULT 'tblResource_Contact';
+DECLARE	SYSRIGHT	VARCHAR(40) DEFAULT 'UPDATE';
+DECLARE	Proc_nm	VARCHAR(255) DEFAULT 'uspResource_Contact';
+DECLARE	Key_cd		VARCHAR(16) DEFAULT 'PK';
+DECLARE RowExists_fg	TINYINT	DEFAULT 0;
+DECLARE ProcFailed_fg	BOOLEAN DEFAULT FALSE;
+###############################################################################
+usp:
+BEGIN
+	#######################################################################
+	-- Initialize
+	#######################################################################
+	IF CallingProc_nm IS NULL OR CallingProc_nm = '' THEN SET CallingProc_nm = '';	END IF;
+	IF Source_nm IS NULL OR Source_nm = '' THEN SET Source_nm = '';	END IF;
+	IF Token_cd IS NULL OR Token_cd = '' THEN SET Token_cd = '';	END IF;
+	IF Mode_cd IS NULL OR Mode_cd = '' THEN SET Mode_cd = 'R';	END IF;
+	IF Resrc_id IS NULL OR Resrc_id = 0 THEN SET Resrc_id =  -2147483647;	END IF;
+	IF Resrc_tp IS NULL OR Resrc_tp = '' THEN SET Resrc_tp = '-2147483647';	END IF;
+	IF Contact_id IS NULL OR Contact_id = 0 THEN SET Contact_id =  -2147483647;	END IF;
+	IF Contact_tp IS NULL OR Contact_tp = '' THEN SET Contact_tp = '-2147483647';	END IF;
+	IF Contact_nm IS NULL OR Contact_nm = '' THEN SET Contact_nm = '-2147483647';	END IF;
+	IF Contact_cd IS NULL OR Contact_cd = '' THEN SET Contact_cd = '-2147483647';	END IF;
+	IF Alias_nm IS NULL OR Alias_nm = '' THEN SET Alias_nm = '-2147483647';	END IF;
+	IF Address_nm IS NULL OR Address_nm = '' THEN SET Address_nm = '-2147483647';	END IF;
+	IF City_cd IS NULL OR City_cd = '' THEN SET City_cd = '-2147483647';	END IF;
+	IF State_cd IS NULL OR State_cd = '' THEN SET State_cd = '-2147483647';	END IF;
+	IF ZIP_cd IS NULL OR ZIP_cd = '' THEN SET ZIP_cd = '-2147483647';	END IF;
+	IF Phone_cd IS NULL OR Phone_cd = '' THEN SET Phone_cd = '-2147483647';	END IF;
+	IF GPS_cd IS NULL OR GPS_cd = '' THEN SET GPS_cd = '-2147483647';	END IF;
+	IF Resrc_tx IS NULL OR Resrc_tx = '' THEN SET Resrc_tx = '-2147483647';	END IF;
+	IF Contact_tx IS NULL OR Contact_tx = '' THEN SET Contact_tx = '-2147483647';	END IF;
+	IF ADD_dm IS NULL THEN SET ADD_dm = CAST('0000-00-00 00:00:00' AS DATETIME);	END IF;
+	IF ADD_nm IS NULL OR ADD_nm = '' THEN SET ADD_nm = '-2147483647';	END IF;
+	IF UPD_dm IS NULL THEN SET UPD_dm = CAST('0000-00-00 00:00:00' AS DATETIME);	END IF;
+	IF UPD_nm IS NULL OR UPD_nm = '' THEN SET UPD_nm = '-2147483647';	END IF;
+	IF DEL_dm IS NULL THEN SET DEL_dm = CAST('0000-00-00 00:00:00' AS DATETIME);	END IF;
+	IF DEL_nm IS NULL OR DEL_nm = '' THEN SET DEL_nm = '-2147483647';	END IF;
+	set	@PK1	= CONCAT(IFNULL(Resrc_id,"(null)"),",",Resrc_tp,",",IFNULL(Contact_id,"(null)"),",",Contact_tp);
+	#######################################################################
+	-- Verify Correct Use of Database Mode
+	#######################################################################
+	IF	Mode_cd	= 'R'
+	OR	Mode_cd	= 'C'
+	OR	Mode_cd	= 'H'
+	OR	Mode_cd	= 'N'
+	THEN
+		SET ProcFailed_fg	= FALSE;
+	ELSE
+		SET ProcFailed_fg	= TRUE;
+		CALL 	errFailedMode
+		(
+			@Proc_nm	:= Proc_nm
+		,	@Mode_cd	:= Mode_cd
+		,	@Action_nm	:= SYSRIGHT
+		,	@Table_nm	:= 'tblResource_Contact'
+		);
+		LEAVE	usp;
+	END IF;
+	#######################################################################
+	-- Return if Primary Key TABLE record exists
+	#######################################################################
+	CALL	rspResource_Contact
+	(
+		@Resrc_id	:= Resrc_id
+	,	@Resrc_tp	:= Resrc_tp
+	,	@Contact_id	:= Contact_id
+	,	@Contact_tp	:= Contact_tp
+	,	@Contact_nm	:= NULL
+	,	@Contact_cd	:= NULL
+	,	@Alias_nm	:= NULL
+	,	@Address_nm	:= Address_nm
+	,	@City_cd	:= City_cd
+	,	@State_cd	:= State_cd
+	,	@Zip_cd		:= Zip_cd
+	,	@Phone_cd	:= Phone_cd
+	,	@GPS_cd		:= GPS_cd
+	,	@ADD_dm	:= ADD_dm
+	,	@ADD_nm	:= ADD_nm
+	,	@UPD_dm	:= UPD_dm
+	,	@UPD_nm	:= UPD_nm
+	,	@DEL_dm	:= DEL_dm
+	,	@DEL_nm	:= DEL_nm
+	,	@Key_cd	:= Key_cd
+	,	@RowExists_fg
+	);
+	IF
+		@RowExists_fg	= 0	-- If PK row dows not exists then return with error
+	THEN
+		SET ProcFailed_fg	= TRUE;
+		CALL 	errPKNotExist
+		(
+			@Proc_nm	:= Proc_nm
+		,	@Table_nm	:= SYSTABLE
+		,	@Action_nm	:= SYSRIGHT
+		,	@Key_nm		:= @PK1
+		);
+		LEAVE	USP;
+	END IF;
+	#######################################################################
+	-- Validate attributes
+	#######################################################################
+	SET 	@ADD_dm	= ADD_dm;
+	SET 	@ADD_nm	= ADD_nm;
+	SET 	@UPD_dm	= UPD_dm;
+	SET 	@UPD_nm	= UPD_nm;
+	SET 	@DEL_dm	= DEL_dm;
+	SET 	@DEL_nm	= DEL_nm;
+	CALL	vspResource_Contact
+	(
+		@Resrc_id	:= Resrc_id
+	,	@Resrc_tp	:= Resrc_tp
+	,	@Contact_id	:= Contact_id
+	,	@Contact_tp	:= Contact_tp
+	,	@Contact_nm	:= Contact_nm
+	,	@Contact_cd	:= Contact_cd
+	,	@Alias_nm	:= Alias_nm
+	,	@Address_nm	:= Address_nm
+	,	@City_cd	:= City_cd
+	,	@State_cd	:= State_cd
+	,	@Zip_cd		:= Zip_cd
+	,	@Phone_cd	:= Phone_cd
+	,	@GPS_cd		:= GPS_cd
+	,	@ADD_dm
+	,	@ADD_nm
+	,	@UPD_dm
+	,	@UPD_nm
+	,	@DEL_dm
+	,	@DEL_nm
+	,	@SYSRIGHT	:= SYSRIGHT
+	,	@Mode_cd	:= Mode_cd
+	,	@IsValid_fg
+	);
+	IF	@IsValid_fg	= FALSE
+	THEN
+		SET ProcFailed_fg	= TRUE;
+		CALL 	errFailedCall
+		(
+			@Proc_nm	:= Proc_nm
+		,	@CallingProc_nm	:= 'vspResource_Contact'
+		);
+		LEAVE	usp;
+	END IF;
+	SET 	ADD_dm	= @ADD_dm;
+	SET 	ADD_nm	= @ADD_nm;
+	SET 	UPD_dm	= @UPD_dm;
+	SET 	UPD_nm	= @UPD_nm;
+	SET 	DEL_dm	= @DEL_dm;
+	SET 	DEL_nm	= @DEL_nm;
+	#######################################################################
+	-- Check Referential Integerity
+	#######################################################################
+	SET	@FK1	= CONCAT(Resrc_tp);
+	SET	@FK2	= CONCAT(Contact_tp);
+	SET	@FK3	= CONCAT(IFNULL(Resrc_id,"(null)"),",",Resrc_tp);
+	SET	@FK4	= CONCAT(IFNULL(Contact_id,"(null)"),",",Contact_tp);
+	SET	@AK1	= CONCAT(IFNULL(Resrc_id,"(null)"),",",Resrc_tp,",",Contact_tp);
+	--
+	--	RESTRICT MODE:
+	--
+	IF
+		Mode_cd	= 'R'
+	THEN
+		SET 	@TABLE	= "tblResourceType";
+		CALL	rspResourceType
+		(
+			@Resrc_tp	:= Resrc_tp
+		,	@ParentResrc_tp	:= NULL
+		,	@ResrcType_tx	:= NULL
+		,	@Left_id	:= NULL
+		,	@Right_id	:= NULL
+		,	@Level_id	:= NULL
+		,	@Order_id	:= NULL
+		,	@Key_cd		:= Key_cd
+		,	@RowExists_fg
+		);
+		IF
+			@RowExists_fg	= 0   -- Foreign key in parent table not found!
+		THEN
+			SET ProcFailed_fg	= TRUE;
+			CALL 	errFKNotExist
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Table_nm	:= @TABLE
+			,	@Action_nm	:= SYSRIGHT
+			,	@Key_nm		:= @FK1
+			);
+			CALL 	errFailedMode
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Mode_cd	:= Mode_cd
+			,	@Action_nm	:= SYSRIGHT
+			,	@Table_nm	:= @TABLE
+			);
+			LEAVE	usp;
+		END IF;
+		SET 	@TABLE	= "tblContactType";
+		CALL	rspContactType
+		(
+			@Contact_tp	:= Contact_tp
+		,	@Key_cd		:= Key_cd
+		,	@RowExists_fg
+		);
+		IF
+			@RowExists_fg	= 0   -- Foreign key in parent table not found!
+		THEN
+			SET ProcFailed_fg	= TRUE;
+			CALL 	errFKNotExist
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Table_nm	:= @TABLE
+			,	@Action_nm	:= SYSRIGHT
+			,	@Key_nm		:= @FK2
+			);
+			CALL 	errFailedMode
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Mode_cd	:= Mode_cd
+			,	@Action_nm	:= SYSRIGHT
+			,	@Table_nm	:= @TABLE
+			);
+			LEAVE	usp;
+		END IF;
+		SET 	@TABLE	= "tblResource";
+		CALL	rspResource
+		(
+			@Resrc_id	:= Resrc_id
+		,	@Resrc_tp	:= Resrc_tp
+		,	@Resrc_tx	:= Resrc_tx
+		,	@ADD_dm	:= ADD_dm
+		,	@ADD_nm	:= ADD_nm
+		,	@UPD_dm	:= UPD_dm
+		,	@UPD_nm	:= UPD_nm
+		,	@DEL_dm	:= DEL_dm
+		,	@DEL_nm	:= DEL_nm
+		,	@Key_cd		:= Key_cd
+		,	@RowExists_fg
+		);
+		IF
+			@RowExists_fg	= 0   -- Foreign key in parent table not found!
+		THEN
+			SET ProcFailed_fg	= TRUE;
+			CALL 	errFKNotExist
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Table_nm	:= @TABLE
+			,	@Action_nm	:= SYSRIGHT
+			,	@Key_nm		:= @FK3
+			);
+			CALL 	errFailedMode
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Mode_cd	:= Mode_cd
+			,	@Action_nm	:= SYSRIGHT
+			,	@Table_nm	:= @TABLE
+			);
+			LEAVE	usp;
+		END IF;
+		SET 	@TABLE	= "tblResource";	-- Contact
+		CALL	rspResource
+		(
+			@Resrc_id	:= Contact_id
+		,	@Resrc_tp	:= Contact_tp
+		,	@Resrc_tx	:= Contact_tx
+		,	@ADD_dm	:= ADD_dm
+		,	@ADD_nm	:= ADD_nm
+		,	@UPD_dm	:= UPD_dm
+		,	@UPD_nm	:= UPD_nm
+		,	@DEL_dm	:= DEL_dm
+		,	@DEL_nm	:= DEL_nm
+		,	@Key_cd		:= Key_cd
+		,	@RowExists_fg
+		);
+		IF
+			@RowExists_fg	= 0   -- Foreign key in parent table not found!
+		THEN
+			SET ProcFailed_fg	= TRUE;
+			CALL 	errFKNotExist
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Table_nm	:= @TABLE
+			,	@Action_nm	:= SYSRIGHT
+			,	@Key_nm		:= @FK4
+			);
+			CALL 	errFailedMode
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Mode_cd	:= Mode_cd
+			,	@Action_nm	:= SYSRIGHT
+			,	@Table_nm	:= @TABLE
+			);
+			LEAVE	usp;
+		END IF;
+	END IF;
+	--
+	--	CASCADE MODE:
+	--
+	IF
+		Mode_cd	= 'C'
+	THEN
+		--	-------------------------------------------------------
+		SET 	@TABLE	= "tblResource";	-- Contact
+		--	-------------------------------------------------------
+		CALL	uspResource
+		(
+			@Resrc_id	:= Contact_id
+		,	@Resrc_tp	:= Contact_tp
+		,	@Resrc_tx	:= Contact_tx
+		,	@ADD_dm		:= ADD_dm
+		,	@ADD_nm		:= ADD_nm
+		,	@UPD_dm		:= UPD_dm
+		,	@UPD_nm		:= UPD_nm
+		,	@DEL_dm		:= DEL_dm
+		,	@DEL_nm		:= DEL_nm
+		,	@ParentResrc_tp	:= NULL
+		,	@ResrcType_tx	:= NULL
+		,	@Left_id	:= NULL
+		,	@Right_id	:= NULL
+		,	@Level_id	:= NULL
+		,	@Order_id	:= NULL
+		,	@CallingProc_nm	:= Proc_nm
+		,	@Source_nm	:= Source_nm
+		,	@Token_cd	:= Token_cd
+		,	@Mode_cd	:= Mode_cd
+		);
+		--	-------------------------------------------------------
+		SET 	@TABLE	= "tblResource";
+		--	-------------------------------------------------------
+		CALL	uspResource
+		(
+			@Resrc_id	:= Resrc_id
+		,	@Resrc_tp	:= Resrc_tp
+		,	@Resrc_tx	:= Resrc_tx
+		,	@ADD_dm		:= ADD_dm
+		,	@ADD_nm		:= ADD_nm
+		,	@UPD_dm		:= UPD_dm
+		,	@UPD_nm		:= UPD_nm
+		,	@DEL_dm		:= DEL_dm
+		,	@DEL_nm		:= DEL_nm
+		,	@ParentResrc_tp	:= NULL
+		,	@ResrcType_tx	:= NULL
+		,	@Left_id	:= NULL
+		,	@Right_id	:= NULL
+		,	@Level_id	:= NULL
+		,	@Order_id	:= NULL
+		,	@CallingProc_nm	:= Proc_nm
+		,	@Source_nm	:= Source_nm
+		,	@Token_cd	:= Token_cd
+		,	@Mode_cd	:= Mode_cd
+		);
+		--	-------------------------------------------------------
+		--	-------------------------------------------------------
+	END IF;
+	#######################################################################
+	-- Update NON-KEY values
+	#######################################################################
+	-- --------------------------------------------------------------------
+	-- Invoke an UPDATE when a non-key attribute is actually modified.
+	-- --------------------------------------------------------------------
+	IF
+		Contact_nm	= '-2147483647'
+	AND	Contact_cd	= '-2147483647'
+	AND	Alias_nm	= '-2147483647'
+	AND	Address_nm	= '-2147483647'
+	AND	City_cd		= '-2147483647'
+	AND	State_cd	= '-2147483647'
+	AND	ZIP_cd		= '-2147483647'
+	AND	Phone_cd	= '-2147483647'
+	AND	GPS_cd	= '-2147483647'
+-- 	AND	ADD_dm	= '0000-00-00 00:00:00'
+-- 	AND	ADD_nm	= '-2147483647'
+	AND	UPD_dm	= '0000-00-00 00:00:00'
+	AND	UPD_nm	= '-2147483647'
+	AND	DEL_dm	= '0000-00-00 00:00:00'
+	AND	DEL_nm	= '-2147483647'
+	THEN
+		LEAVE	USP;
+	END IF;
+BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+	BEGIN
+		SET ProcFailed_fg	= TRUE;
+		CALL 	errFailedEvent
+		(
+			@Proc_nm	:= Proc_nm
+		,	@Table_nm	:= SYSTABLE
+		,	@Action_nm	:= SYSRIGHT
+		);
+	END;
+	UPDATE
+		tblResource_Contact
+	SET
+		tblResource_Contact.Contact_nm	= 
+		CASE
+			WHEN	Contact_nm	= '-2147483647'
+			THEN	tblResource_Contact.Contact_nm
+			ELSE 	Contact_nm
+		END
+	,	tblResource_Contact.Contact_cd	= 
+		CASE
+			WHEN	Contact_cd	= '-2147483647'
+			THEN	tblResource_Contact.Contact_cd
+			ELSE 	Contact_cd
+		END
+	,	tblResource_Contact.Alias_nm	=
+		CASE
+			WHEN	Alias_nm	= '-2147483647'
+			THEN	tblResource_Contact.Alias_nm
+			ELSE 	Alias_nm
+		END
+	,	tblResource_Contact.Address_nm	=
+		CASE
+			WHEN	Address_nm	= '-2147483647'
+			THEN	tblResource_Contact.Address_nm
+			ELSE 	Address_nm
+		END
+	,	tblResource_Contact.City_cd	=
+		CASE
+			WHEN	City_cd	= '-2147483647'
+			THEN	tblResource_Contact.City_cd
+			ELSE 	City_cd
+		END
+	,	tblResource_Contact.State_cd	=
+		CASE
+			WHEN	State_cd	= '-2147483647'
+			THEN	tblResource_Contact.State_cd
+			ELSE 	State_cd
+		END
+	,	tblResource_Contact.ZIP_cd	=
+		CASE
+			WHEN	ZIP_cd	= '-2147483647'
+			THEN	tblResource_Contact.ZIP_cd
+			ELSE 	ZIP_cd
+		END
+	,	tblResource_Contact.Phone_cd	=
+		CASE
+			WHEN	Phone_cd	= '-2147483647'
+			THEN	tblResource_Contact.Phone_cd
+			ELSE 	Phone_cd
+		END
+	,	tblResource_Contact.GPS_cd	=
+		CASE
+			WHEN	GPS_cd	= '-2147483647'
+			THEN	tblResource_Contact.GPS_cd
+			ELSE 	GPS_cd
+		END
+	,	tblResource_Contact.UPD_dm	=
+		CASE
+			WHEN	UPD_dm	= '0000-00-00 00:00:00'
+			THEN	tblResource_Contact.UPD_dm
+			ELSE 	UPD_dm
+		END
+	,	tblResource_Contact.UPD_nm	=
+		CASE
+			WHEN	UPD_nm	= '-2147483647'
+			THEN	tblResource_Contact.UPD_nm
+			ELSE 	UPD_nm
+		END
+	,	tblResource_Contact.DEL_dm	=
+		CASE
+			WHEN	DEL_dm	= '0000-00-00 00:00:00'
+			THEN	tblResource_Contact.DEL_dm
+			ELSE 	DEL_dm
+		END
+	,	tblResource_Contact.DEL_nm	=
+		CASE
+			WHEN	DEL_nm	= '-2147483647'
+			THEN	tblResource_Contact.DEL_nm
+			ELSE 	DEL_nm
+		END
+	WHERE	1=1
+	AND
+		tblResource_Contact.Resrc_id	= Resrc_id
+	AND	tblResource_Contact.Resrc_tp	= Resrc_tp
+	AND	tblResource_Contact.Contact_id	= Contact_id
+	AND	tblResource_Contact.Contact_tp	= Contact_tp
+	;
+END;
+	#######################################################################
+	-- Insert this transaction in the transaction history log
+	#######################################################################
+	#######################################################################
+END usp;
+###############################################################################
+END */$$
+DELIMITER ;
+
+/* Procedure structure for procedure `uspUser` */
+
+/*!50003 DROP PROCEDURE IF EXISTS  `uspUser` */;
+
+DELIMITER $$
+
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `uspUser`(
+	User_id		INT SIGNED		-- PK1 
+,	User_tp		VARCHAR(64)		-- PK2 AK1
+,	User_nm		VARCHAR(256)		--  AK2
+,	User_cd		VARCHAR(128)	
+,	Hashed_cd	VARCHAR(128)
+,	Email_nm	VARCHAR(256)
+,	Challenge_cd	VARCHAR(128)
+,	Response_cd	VARCHAR(128)
+,	User_tx		MEDIUMTEXT	
+,	UserADD_dm	DATETIME	
+,	UserADD_nm	VARCHAR(256)	
+,	UserUPD_dm	DATETIME	
+,	UserUPD_nm	VARCHAR(256)	
+,	UserDEL_dm	DATETIME	
+,	UserDEL_nm	VARCHAR(256)	
+,	ParentUser_tp	VARCHAR(64)	
+,	UserType_tx	MEDIUMTEXT	
+,	UserTypeLeft_id	INT SIGNED	
+,	UserTypeRight_id	INT SIGNED	
+,	UserTypeLevel_id	INT SIGNED	
+,	UserTypeOrder_id	INT SIGNED	
+,	CallingProc_nm	VARCHAR(128)	-- CallingProc	The sproc calling this proc
+,	Source_nm	VARCHAR(128)	-- SourceSystem	System name
+,	Token_cd	VARCHAR(64)	-- Token	Security Token
+,	Mode_cd		VARCHAR(16)	-- Mode	Database cascade mode code
+)
+BEGIN
+/*
+**	Name:		uspUser
+**	Type:		DB API procedure: Insert
+**	Purpose:	To update User data in tblUser
+**	Author:		Solomon S. Shacter
+**	Organization:	Innovella, Inc.
+**
+**	Modified:	6/14/2013
+**	Modnumber:	00
+**	Modification:	Original
+**
+*/
+###############################################################################
+DECLARE	SYSTABLE	VARCHAR(255) DEFAULT 'tblUser';
+DECLARE	SYSRIGHT	VARCHAR(40) DEFAULT 'UPDATE';
+DECLARE	Proc_nm		VARCHAR(255) DEFAULT 'uspUser';
+DECLARE	Key_cd		VARCHAR(16) DEFAULT 'PK';
+DECLARE RowExists_fg	TINYINT	DEFAULT 0;
+DECLARE ProcFailed_fg	BOOLEAN DEFAULT FALSE;
+###############################################################################
+USP:
+BEGIN
+	#######################################################################
+	-- Initialize
+	#######################################################################
+	IF Source_nm IS NULL OR Source_nm = '' THEN SET Source_nm = '';	END IF;
+	IF Token_cd IS NULL OR Token_cd = '' THEN SET Token_cd = '';	END IF;
+	IF Mode_cd IS NULL OR Mode_cd = '' THEN SET Mode_cd = 'R';	END IF;
+	IF User_id IS NULL OR User_id = 0 THEN SET User_id =  -2147483647;	END IF;
+	IF User_tp IS NULL OR User_tp = '' THEN SET User_tp = '-2147483647';	END IF;
+	IF User_nm IS NULL OR User_nm = '' THEN SET User_nm = '-2147483647';	END IF;
+	IF User_cd IS NULL OR User_cd = '' THEN SET User_cd = '-2147483647';	END IF;
+	IF Hashed_cd IS NULL OR Hashed_cd = '' THEN SET Hashed_cd = '-2147483647';	END IF;
+	IF Email_nm IS NULL OR Email_nm = '' THEN SET User_cd = '-2147483647';	END IF;
+	IF Challenge_cd IS NULL OR Challenge_cd = '' THEN SET Challenge_cd = '-2147483647';	END IF;
+	IF Response_cd IS NULL OR Response_cd = '' THEN SET Response_cd = '-2147483647';	END IF;
+	IF User_tx IS NULL OR User_tx = '' THEN SET User_tx = '-2147483647';	END IF;
+	IF UserADD_dm IS NULL OR UserADD_dm = '' THEN SET UserADD_dm = '0000-00-00 00:00:00';	END IF;
+	IF UserADD_nm IS NULL OR UserADD_nm = '' THEN SET UserADD_nm = '-2147483647';	END IF;
+	IF UserUPD_dm IS NULL OR UserUPD_dm = '' THEN SET UserUPD_dm = '0000-00-00 00:00:00';	END IF;
+	IF UserUPD_nm IS NULL OR UserUPD_nm = '' THEN SET UserUPD_nm = '-2147483647';	END IF;
+	IF UserDEL_dm IS NULL OR UserDEL_dm = '' THEN SET UserDEL_dm = '0000-00-00 00:00:00';	END IF;
+	IF UserDEL_nm IS NULL OR UserDEL_nm = '' THEN SET UserDEL_nm = '-2147483647';	END IF;
+	IF ParentUser_tp IS NULL OR ParentUser_tp = '' THEN SET ParentUser_tp = '-2147483647';	END IF;
+	IF UserType_tx IS NULL OR UserType_tx = '' THEN SET UserType_tx = '-2147483647';	END IF;
+	IF UserTypeLeft_id IS NULL OR UserTypeLeft_id = 0 THEN SET UserTypeLeft_id =  -2147483647;	END IF;
+	IF UserTypeRight_id IS NULL OR UserTypeRight_id = 0 THEN SET UserTypeRight_id =  -2147483647;	END IF;
+	IF UserTypeLevel_id IS NULL OR UserTypeLevel_id = 0 THEN SET UserTypeLevel_id =  -2147483647;	END IF;
+	IF UserTypeOrder_id IS NULL OR UserTypeOrder_id = 0 THEN SET UserTypeOrder_id =  -2147483647;	END IF;
+	#######################################################################
+	-- Verify Correct Use of Database Mode
+	#######################################################################
+	IF	Mode_cd	= 'R'
+	OR	Mode_cd	= 'C'
+	OR	Mode_cd	= 'H'
+	OR	Mode_cd	= 'N'
+	THEN
+		SET ProcFailed_fg	= FALSE;
+	ELSE
+		SET ProcFailed_fg	= TRUE;
+		CALL 	errFailedMode
+		(
+			@Proc_nm	:= Proc_nm
+		,	@Mode_cd	:= Mode_cd
+		,	@Action_nm	:= SYSRIGHT
+		,	@Table_nm	:= SYSTABLE
+		);
+		LEAVE	USP;
+	END IF;
+	#######################################################################
+	-- Return error if Primary Key TABLE record does NOT exist
+	#######################################################################
+	SET 	@PK1	= CONCAT(User_id,",",User_tp);
+	-- --------------------------------------------------------------------
+	CALL	rspUser
+	(
+		@User_id	:= User_id
+	,	@User_tp	:= User_tp
+	,	@User_nm	:= User_nm
+	,	@User_cd	:= User_cd
+	,	@Hashed_cd	:= Hashed_cd
+	,	@Email_nm	:= Email_nm
+	,	@Challenge_cd	:= Challenge_cd
+	,	@Response_cd	:= Response_cd
+	,	@Key_cd		:= Key_cd
+	,	@RowExists_fg
+	);
+	IF
+		@RowExists_fg	= 0	-- If PK row does not exist then return with error
+	THEN
+		SET ProcFailed_fg	= TRUE;
+		CALL 	errPKNotExist
+		(
+			@Proc_nm	:= Proc_nm
+		,	@Table_nm	:= SYSTABLE
+		,	@Action_nm	:= SYSRIGHT
+		,	@Key_nm		:= @PK1
+		);
+		LEAVE	USP;
+	END IF;
+	#######################################################################
+	-- Validate attributes
+	#######################################################################
+	--	Set the VSP INOUT parameters to the proc IN parameters
+	-- --------------------------------------------------------------------
+	CALL	vspUser
+	(
+		@User_id	:= User_id
+	,	@User_tp	:= User_tp
+	,	@User_nm	:= User_nm
+	,	@User_cd	:= User_cd
+	,	@Hashed_cd	:= Hashed_cd
+	,	@Email_nm	:= Email_nm
+	,	@Challenge_cd	:= Challenge_cd
+	,	@Response_cd	:= Response_cd
+	,	@SYSRIGHT	:= SYSRIGHT
+	,	@Mode_cd	:= Mode_cd
+	,	@IsValid_fg
+	);
+	IF	@IsValid_fg	= FALSE
+	THEN
+		SET ProcFailed_fg	= TRUE;
+		CALL 	errFailedCall
+		(
+			@Proc_nm	:= Proc_nm
+		,	@CallingProc_nm	:= Proc_nm
+		);
+		LEAVE	USP;
+	END IF;
+	--	Set the proc IN parameters to the VSP INOUT parameters
+	#######################################################################
+	-- Check Referential Integerity
+	#######################################################################
+	SET 	@FK1	= CONCAT(User_tp);
+	SET 	@FK2	= CONCAT(User_id,",",User_tp);
+	-- --------------------------------------------------------------------
+	IF
+		Mode_cd	= 'R'
+	THEN
+		--
+		--	RESTRICT MODE:	tblUserType
+		--
+		CALL	rspUserType
+		(
+			@User_tp	:= User_tp
+		,	@Key_cd		:= Key_cd
+		,	@RowExists_fg
+		);
+		IF
+			@RowExists_fg	= 0   -- Foreign key in tblUserType not found!
+		THEN
+			SET ProcFailed_fg	= TRUE;
+			CALL 	errFKNotExist
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Table_nm	:= 'tblUserType'
+			,	@Action_nm	:= SYSRIGHT
+			,	@Key_nm		:= @FK1
+			);
+			CALL 	errFailedMode
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Mode_cd	:= Mode_cd
+			,	@Action_nm	:= SYSRIGHT
+			,	@Table_nm	:= 'tblUserType'
+			);
+			LEAVE	USP;
+		END IF;
+		--
+		--	RESTRICT MODE:	tblResource
+		--
+		CALL	rspResource
+		(
+			@Resrc_id	:= User_id
+		,	@Resrc_tp	:= User_tp
+		,	@Resrc_tx	:= User_tx
+		,	@ADD_dm		:= UserADD_dm
+		,	@ADD_nm		:= UserADD_nm
+		,	@UPD_dm		:= UserUPD_dm
+		,	@UPD_nm		:= UserUPD_nm
+		,	@DEL_dm		:= UserDEL_dm
+		,	@DEL_nm		:= UserDEL_nm
+		,	@Key_cd		:= Key_cd
+		,	@RowExists_fg
+		);
+		IF
+			@RowExists_fg	= 0   -- Foreign key in tblResource not found!
+		THEN
+			SET ProcFailed_fg	= TRUE;
+			CALL 	errFKNotExist
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Table_nm	:= 'tblResource'
+			,	@Action_nm	:= SYSRIGHT
+			,	@Key_nm		:= @FK2
+			);
+			CALL 	errFailedMode
+			(
+				@Proc_nm	:= Proc_nm
+			,	@Mode_cd	:= Mode_cd
+			,	@Action_nm	:= SYSRIGHT
+			,	@Table_nm	:= 'tblResource'
+			);
+			LEAVE	USP;
+		END IF;
+	END IF;
+	-- --------------------------------------------------------------------
+	-- --------------------------------------------------------------------
+	IF
+		Mode_cd	= 'C'
+	THEN
+		--
+		--	CASCADE MODE:	tblUserType
+		--
+		CALL	uspUserType
+		(
+			@User_tp		:= User_tp
+		,	@ParentUser_tp	:= ParentUser_tp
+		,	@UserType_tx		:= UserType_tx
+		,	@UserTypeLeft_id	:= UserTypeLeft_id
+		,	@UserTypeRight_id	:= UserTypeRight_id
+		,	@UserTypeLevel_id	:= UserTypeLevel_id
+		,	@UserTypeOrder_id	:= UserTypeOrder_id
+		,	@CallingProc_nm	:= CallingProc_nm
+		,	@Source_nm	:= Source_nm
+		,	@Token_cd	:= Token_cd
+		,	@Mode_cd	:= 'R'	-- This Table Is Restricted and Does Not Allow A Cascade From an FK Table.
+		);
+		--
+		--	CASCADE MODE:	tblResource
+		--
+		CALL	uspResource
+		(
+			@Resrc_id	:= User_id
+		,	@Resrc_tp	:= User_tp
+		,	@Resrc_tx	:= User_tx
+		,	@ADD_dm		:= UserADD_dm
+		,	@ADD_nm		:= UserADD_nm
+		,	@UPD_dm		:= UserUPD_dm
+		,	@UPD_nm		:= UserUPD_nm
+		,	@DEL_dm		:= UserDEL_dm
+		,	@DEL_nm		:= UserDEL_nm
+		,	@ParentResrc_tp	:= ParentUser_tp
+		,	@ResrcType_tx	:= UserType_tx
+		,	@Left_id	:= UserTypeLeft_id
+		,	@Right_id	:= UserTypeRight_id
+		,	@Level_id	:= UserTypeLevel_id
+		,	@Order_id	:= UserTypeOrder_id
+		,	@CallingProc_nm	:= Proc_nm
+		,	@Source_nm	:= Source_nm
+		,	@Token_cd	:= Token_cd
+		,	@Mode_cd	:= Mode_cd
+		);
+	END IF;
+	#######################################################################
+	-- Update NON-KEY values
+	#######################################################################
+	-- --------------------------------------------------------------------
+	-- Invoke an UPDATE when a non-key attribute is actually modified.
+	-- --------------------------------------------------------------------
+	IF 	
+		User_nm	= '-2147483647'
+	AND 	User_cd	= '-2147483647'
+	AND 	Hashed_cd	= '-2147483647'
+	AND 	Email_nm	= '-2147483647'
+	AND 	Challenge_cd	= '-2147483647'
+	AND 	Response_cd	= '-2147483647'
+	THEN
+		LEAVE 	USP;
+	END IF;
+	-- --------------------------------------------------------------------
+BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+	BEGIN
+		SET ProcFailed_fg	= TRUE;
+		CALL 	errFailedEvent
+		(
+			@Proc_nm	:= Proc_nm
+		,	@Table_nm	:= SYSTABLE
+		,	@Action_nm	:= SYSRIGHT
+		);
+	END;
+	UPDATE
+		tblUser
+	SET	
+		tblUser.User_nm	=
+		CASE
+			WHEN	User_nm	= '-2147483647'
+			THEN	tblUser.User_nm
+			ELSE 	User_nm
+		END
+	,	tblUser.User_cd	=
+		CASE
+			WHEN	User_cd	= '-2147483647'
+			THEN	tblUser.User_cd
+			ELSE 	User_cd
+		END
+	,	tblUser.Hashed_cd	=
+		CASE
+			WHEN	Hashed_cd	= '-2147483647'
+			THEN	tblUser.Hashed_cd
+			ELSE 	Hashed_cd
+		END
+	,	tblUser.Email_nm	=
+		CASE
+			WHEN	Email_nm	= '-2147483647'
+			THEN	tblUser.Email_nm
+			ELSE 	Email_nm
+		END
+	,	tblUser.Challenge_cd	=
+		CASE
+			WHEN	Challenge_cd	= '-2147483647'
+			THEN	tblUser.Challenge_cd
+			ELSE 	Challenge_cd
+		END
+	,	tblUser.Response_cd	=
+		CASE
+			WHEN	Response_cd	= '-2147483647'
+			THEN	tblUser.Response_cd
+			ELSE 	Response_cd
+		END
+	WHERE
+		tblUser.User_id	= User_id
+	AND	tblUser.User_tp	= User_tp
+	;
+END;
+	#######################################################################
+	-- Insert this transaction in the transaction history log
+	#######################################################################
+	#######################################################################
+END USP;
+###############################################################################
+END */$$
+DELIMITER ;
+
 /* Procedure structure for procedure `uspUserType` */
 
 /*!50003 DROP PROCEDURE IF EXISTS  `uspUserType` */;
 
 DELIMITER $$
 
-/*!50003 CREATE DEFINER=`innovella`@`localhost` PROCEDURE `uspUserType`(
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `uspUserType`(
 	User_tp		VARCHAR(64)		-- PK1 
 ,	ParentUser_tp		VARCHAR(64)	
 ,	UserType_tx		MEDIUMTEXT	
@@ -8549,7 +10565,7 @@ DELIMITER ;
 
 DELIMITER $$
 
-/*!50003 CREATE DEFINER=`innovella`@`localhost` PROCEDURE `uspUser_Company`(
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `uspUser_Company`(
 	User_id		INT SIGNED		-- PK1 
 ,	User_tp		VARCHAR(64)		-- PK2 AK1
 ,	Company_id	INT SIGNED		-- PK1 
@@ -8587,6 +10603,14 @@ BEGIN
 **	Modified:	4/12/2013
 **	Modnumber:	00
 **	Modification:	Original
+**	NOTE: Special Case
+	AK in parent tblUser = User_tp, User_nm 
+	AK in tblResource_Company = Resrc_tp, Company_id, Company_tp, Resrc_nm
+	AK for "User_Company" = User_tp(tblResource_Company.Resrc_tp), Company_tp, Company_nm, User_nm(tblResource_Company.Resrc_nm)
+**
+	A user type and user name exists once in tblUser and once in tblCompany
+	A user type and user name exists once in tblUser but may exist once or more in tblResource_Conatct, tblResource_Project
+	A user may belong to more than one Group which may belong to one or more Companies
 **
 */
 ###############################################################################
@@ -8660,9 +10684,9 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 	,	@Resrc_tp	:= User_tp
 	,	@Company_id	:= Company_id
 	,	@Company_tp	:= Company_tp
-	,	@Resrc_nm	:= User_nm
-	,	@Company_cd	:= User_cd
-	,	@Alias_nm	:= Alias_nm
+	,	@Resrc_nm	:= NULL
+	,	@Resrc_cd	:= NULL
+	,	@Alias_nm	:= NULL
 	,	@ADD_dm	:= ADD_dm
 	,	@ADD_nm	:= ADD_nm
 	,	@UPD_dm	:= UPD_dm
@@ -8681,7 +10705,7 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 			@Proc_nm	:= Proc_nm
 		,	@Table_nm	:= SYSTABLE
 		,	@Action_nm	:= SYSRIGHT
-		,	@Key_nm		:= @PK1
+		,	@Key_nm		:= PK1
 		);
 		LEAVE	USP;
 	END IF;
@@ -8694,15 +10718,15 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 	SET 	@UPD_nm	= UPD_nm;
 	SET 	@DEL_dm	= DEL_dm;
 	SET 	@DEL_nm	= DEL_nm;
-	CALL	vspResource_Company
+	CALL	vspUser_Company
 	(
-		@Resrc_id	:= User_id
-	,	@Resrc_tp	:= User_tp
+		@User_id	:= User_id
+	,	@User_tp	:= User_tp
 	,	@Company_id	:= Company_id
 	,	@Company_tp	:= Company_tp
-	,	@Resrc_nm	:= User_nm
-	,	@Resrc_cd	:= User_cd
-	,	@Alias_nm	:= Alias_nm	
+	,	@User_nm	:= User_nm
+	,	@User_cd	:= User_cd
+	,	@Company_nm	:= Company_nm
 	,	@ADD_dm
 	,	@ADD_nm
 	,	@UPD_dm
@@ -8765,7 +10789,7 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 				@Proc_nm	:= Proc_nm
 			,	@Table_nm	:= @TABLE
 			,	@Action_nm	:= SYSRIGHT
-			,	@Key_nm		:= @FK1
+			,	@Key_nm		:= FK1
 			);
 			CALL 	errFailedMode
 			(
@@ -8804,7 +10828,7 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 				@Proc_nm	:= Proc_nm
 			,	@Table_nm	:= @TABLE
 			,	@Action_nm	:= SYSRIGHT
-			,	@Key_nm		:= @FK2
+			,	@Key_nm		:= FK2
 			);
 			CALL 	errFailedMode
 			(
@@ -9238,7 +11262,7 @@ DELIMITER ;
 
 DELIMITER $$
 
-/*!50003 CREATE DEFINER=`innovella`@`localhost` PROCEDURE `vspResource_Company`(
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `vspResource_Company`(
 	Resrc_id		INT SIGNED
 ,	Resrc_tp		VARCHAR(64)
 ,	Company_id		INT SIGNED
@@ -9315,7 +11339,7 @@ BEGIN
 			,	@Company_id	:= Company_id
 			,	@Company_tp	:= Company_tp
 			,	@Resrc_nm	:= Resrc_nm
-			,	@Company_cd	:= Resrc_cd
+			,	@Resrc_cd	:= Resrc_cd
 			,	@Alias_nm	:= Alias_nm
 			,	@ADD_dm	:= ADD_dm
 			,	@ADD_nm	:= ADD_nm
@@ -9369,11 +11393,189 @@ BEGIN
 			SET	DEL_dm	= NULL;
 		END IF;
 		IF	(DEL_nm	IS NULL OR DEL_nm = '-2147483647')
-		and	(DEL_dm > '0000-00-00 00:00:00')
+		AND	(DEL_dm > '0000-00-00 00:00:00')
 		THEN
-			SET	DEL_nm	= current_user();
-		else
-			set 	DEL_nm	= NULL;
+			SET	DEL_nm	= CURRENT_USER();
+		ELSE
+			SET 	DEL_nm	= NULL;
+		END IF;
+		LEAVE VSP;
+	END IF;
+	IF
+		SYSRIGHT = 'DELETE'
+	THEN
+		IF	DEL_dm	IS NULL OR DEL_dm = '0000-00-00 00:00:00'
+		THEN
+			SET	DEL_dm	= UTC_TIMESTAMP();
+		END IF;
+		IF	DEL_nm	IS NULL OR DEL_nm = '-2147483647'
+		THEN
+			SET	DEL_nm	= CURRENT_USER();
+		END IF;
+		SET	UPD_dm	= UTC_TIMESTAMP();
+		SET	UPD_nm	= CURRENT_USER();
+		LEAVE VSP;
+	END IF;
+	#######################################################################
+END	VSP
+;
+###############################################################################
+END */$$
+DELIMITER ;
+
+/* Procedure structure for procedure `vspResource_Contact` */
+
+/*!50003 DROP PROCEDURE IF EXISTS  `vspResource_Contact` */;
+
+DELIMITER $$
+
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `vspResource_Contact`(
+	Resrc_id	INT SIGNED
+,	Resrc_tp	VARCHAR(64)
+,	Contact_id	INT SIGNED
+,	Contact_tp	VARCHAR(64)
+,	Contact_nm	VARCHAR(256)
+,	Contact_cd	VARCHAR(128)
+,	Alias_nm	VARCHAR(256)
+,	Address_nm	VARCHAR(256)
+,	City_cd		VARCHAR(128)
+,	State_cd	VARCHAR(128)
+,	Zip_cd		VARCHAR(128)
+,	Phone_cd	VARCHAR(128)
+,	GPS_cd		VARCHAR(128)
+,INOUT	ADD_dm		DATETIME
+,INOUT	ADD_nm		VARCHAR(256)
+,INOUT	UPD_dm		DATETIME
+,INOUT	UPD_nm		VARCHAR(256)
+,INOUT	DEL_dm		DATETIME
+,INOUT	DEL_nm		VARCHAR(256)
+,	SYSRIGHT		VARCHAR(30)		-- Intended DML action
+,	Mode_cd		VARCHAR(16)		-- Database cascade mode code
+,	OUT 	IsValid_fg	BOOLEAN
+)
+BEGIN
+/*
+**	Name:		vspResource_Contact
+**	Type:		Validation Stored Procedure
+**	Purpose:	Validate a record in tblResource_Contact
+**	Author:		Solomon S. Shacter
+**	Organization:	Innovella, Inc.
+**
+**	Modified:	7/2/2013
+**	Modnumber:
+**	Modification:	
+**
+*/
+###############################################################################
+DECLARE	SYSTABLE	VARCHAR(255) DEFAULT 'tblResource_Contact';
+DECLARE	Proc_nm	VARCHAR(255) DEFAULT 'vspResource_Contact';
+DECLARE	Key_cd		VARCHAR(16) DEFAULT 'PK';
+DECLARE RowExists_fg	TINYINT	DEFAULT 0;
+DECLARE ProcFailed_fg	BOOLEAN DEFAULT FALSE;
+###############################################################################
+VSP:
+BEGIN
+	#######################################################################
+	-- Initialize
+	#######################################################################
+	DECLARE	AK1		VARCHAR(255) DEFAULT CONCAT(IFNULL(Resrc_id,"(null)"), Resrc_tp,",",Contact_tp);
+	#######################################################################
+	-- Validate:
+	--
+	--	Duplicate names within a type are not allowed
+	--	Alternate (Candidate) Key Check
+	#######################################################################
+	IF
+		SYSRIGHT	= 'INSERT'
+	OR 	SYSRIGHT 	= 'UPDATE'
+	THEN
+		IF
+		EXISTS
+		(
+			SELECT	1
+			FROM
+				tblResource_Contact
+			WHERE	1=1
+			AND	tblResource_Contact.Resrc_id	= Resrc_id
+			AND	tblResource_Contact.Resrc_tp	= Resrc_tp
+			AND	tblResource_Contact.Contact_id	= Contact_id
+			AND	tblResource_Contact.Contact_tp	= Contact_tp
+--			AND	tblResource_Contact.Contact_nm	= Contact_nm
+		)
+		THEN
+			SET IsValid_fg	= TRUE;	-- Return if the attributes did not change
+		ELSE
+			CALL	rspResource_Contact
+			(
+				@Resrc_id	:= Resrc_id
+			,	@Resrc_tp	:= Resrc_tp
+			,	@Contact_id	:= NULL
+			,	@Contact_tp	:= Contact_tp
+			,	@Contact_nm	:= NULL
+			,	@Contact_cd	:= NULL
+			,	@Alias_nm	:= NULL
+			,	@Address_nm	:= NULL
+			,	@City_cd	:= NULL
+			,	@State_cd	:= NULL
+			,	@Zip_cd		:= NULL
+			,	@Phone_cd	:= NULL
+			,	@GPS_cd		:= NULL
+			,	@ADD_dm	:= NULL
+			,	@ADD_nm	:= NULL
+			,	@UPD_dm	:= NULL
+			,	@UPD_nm	:= NULL
+			,	@DEL_dm	:= NULL
+			,	@DEL_nm	:= NULL
+			,	@Key_cd	:= 'AK'
+			,	@RowExists_fg
+			);
+			IF
+				@RowExists_fg	= 1	-- AK exists and not for this PK
+			THEN
+				SET IsValid_fg	= FALSE;
+				CALL 	errAKExist
+				(
+					@Proc_nm	:= Proc_nm
+				,	@Table_nm	:= SYSTABLE
+				,	@AK_nm		:= AK1
+				);
+			END IF;
+		END IF;
+	END IF;
+	IF
+		SYSRIGHT = 'INSERT'
+	THEN
+		IF	ADD_dm IS NULL OR ADD_dm = '0000-00-00 00:00:00'
+		THEN
+			SET	ADD_dm	= UTC_TIMESTAMP();
+		END IF;
+		IF	ADD_nm	IS NULL OR ADD_nm = '-2147483647'
+		THEN
+			SET	ADD_nm	= CURRENT_USER();
+		END IF;
+		LEAVE VSP;
+	END IF;
+	IF
+		SYSRIGHT = 'UPDATE'
+	THEN
+		IF	UPD_dm	IS NULL OR UPD_dm = '0000-00-00 00:00:00'
+		THEN
+			SET	UPD_dm	= UTC_TIMESTAMP();
+		END IF;
+		IF	UPD_nm	IS NULL OR UPD_nm = '-2147483647'
+		THEN
+			SET	UPD_nm	= CURRENT_USER();
+		END IF;
+		IF	DEL_dm	IS NULL OR DEL_dm = '0000-00-00 00:00:00'
+		THEN
+			SET	DEL_dm	= NULL;
+		END IF;
+		IF	(DEL_nm	IS NULL OR DEL_nm = '-2147483647')
+		AND	(DEL_dm > '0000-00-00 00:00:00')
+		THEN
+			SET	DEL_nm	= CURRENT_USER();
+		ELSE
+			SET 	DEL_nm	= NULL;
 		END IF;
 		LEAVE VSP;
 	END IF;
@@ -9564,6 +11766,165 @@ END	VSP
 END */$$
 DELIMITER ;
 
+/* Procedure structure for procedure `vspUser_Company` */
+
+/*!50003 DROP PROCEDURE IF EXISTS  `vspUser_Company` */;
+
+DELIMITER $$
+
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `vspUser_Company`(
+	User_id		INT SIGNED
+,	User_tp		VARCHAR(64)
+,	Company_id	INT SIGNED
+,	Company_tp	VARCHAR(64)
+,	User_nm		VARCHAR(256)
+,	User_cd		VARCHAR(128)
+,	Company_nm	VARCHAR(256)
+,INOUT	ADD_dm		DATETIME
+,INOUT	ADD_nm		VARCHAR(256)
+,INOUT	UPD_dm		DATETIME
+,INOUT	UPD_nm		VARCHAR(256)
+,INOUT	DEL_dm		DATETIME
+,INOUT	DEL_nm		VARCHAR(256)
+,	SYSRIGHT		VARCHAR(30)		-- Intended DML action
+,	Mode_cd		VARCHAR(16)		-- Database cascade mode code
+,	OUT 	IsValid_fg	BOOLEAN
+)
+BEGIN
+/*
+**	Name:		vspUser_Company
+**	Type:		Validation Stored Procedure
+**	Purpose:	Validate a record in tblResource_Company
+**	Author:		Solomon S. Shacter
+**	Company:	Innovella, Inc.
+**
+**	Modified:	7/2/2013
+**	Modnumber:
+**	Modification:	
+**
+*/
+###############################################################################
+DECLARE	SYSTABLE	VARCHAR(255) DEFAULT 'tblResource_Company';
+DECLARE	Proc_nm	VARCHAR(255) DEFAULT 'vspUser_Company';
+DECLARE	Key_cd		VARCHAR(16) DEFAULT 'PK';
+DECLARE RowExists_fg	TINYINT	DEFAULT 0;
+DECLARE ProcFailed_fg	BOOLEAN DEFAULT FALSE;
+###############################################################################
+VSP:
+BEGIN
+	#######################################################################
+	-- Initialize
+	#######################################################################
+	DECLARE	AK1		VARCHAR(255) DEFAULT CONCAT(User_tp,",",Company_tp,",",Company_nm,",",User_nm);
+	#######################################################################
+	-- Validate:
+	--
+	--	Duplicate names within a type are not allowed
+	--	Alternate (Candidate) Key Check
+	#######################################################################
+	IF
+		SYSRIGHT	= 'INSERT'
+	OR 	SYSRIGHT 	= 'UPDATE'
+	THEN
+		IF
+		EXISTS
+		(
+			SELECT	1
+			FROM
+				tvwUser_Company
+			WHERE	1=1
+			AND	tvwUser_Company.User_id	= User_id
+			AND	tvwUser_Company.User_tp	= User_tp
+			AND	tvwUser_Company.User_nm	= User_nm
+			AND	tvwUser_Company.Company_id	= Company_id
+			AND	tvwUser_Company.Company_tp	= Company_tp
+			AND	tvwUser_Company.Company_nm	= Company_nm
+		)
+		THEN
+			SET IsValid_fg	= TRUE;	-- Return if the attributes did not change
+		ELSE
+			IF
+			EXISTS
+			(
+				SELECT	1
+				FROM
+					tvwUser_Company
+				WHERE	1=1
+				AND	tvwUser_Company.User_tp	= User_tp
+				AND	tvwUser_Company.User_nm	= User_nm
+				AND	tvwUser_Company.Company_tp	= Company_tp
+				AND	tvwUser_Company.Company_nm	= Company_nm
+			)	-- AK exists and not for this PK
+			THEN
+				SET IsValid_fg	= FALSE;
+				CALL 	errAKExist
+				(
+					@Proc_nm	:= Proc_nm
+				,	@Table_nm	:= SYSTABLE
+				,	@AK_nm		:= AK1
+				);
+			END IF;
+		END IF;
+	END IF;
+	IF
+		SYSRIGHT = 'INSERT'
+	THEN
+		IF	ADD_dm IS NULL OR ADD_dm = '0000-00-00 00:00:00'
+		THEN
+			SET	ADD_dm	= UTC_TIMESTAMP();
+		END IF;
+		IF	ADD_nm	IS NULL OR ADD_nm = '-2147483647'
+		THEN
+			SET	ADD_nm	= CURRENT_USER();
+		END IF;
+		LEAVE VSP;
+	END IF;
+	IF
+		SYSRIGHT = 'UPDATE'
+	THEN
+		IF	UPD_dm	IS NULL OR UPD_dm = '0000-00-00 00:00:00'
+		THEN
+			SET	UPD_dm	= UTC_TIMESTAMP();
+		END IF;
+		IF	UPD_nm	IS NULL OR UPD_nm = '-2147483647'
+		THEN
+			SET	UPD_nm	= CURRENT_USER();
+		END IF;
+		IF	DEL_dm	IS NULL OR DEL_dm = '0000-00-00 00:00:00'
+		THEN
+			SET	DEL_dm	= NULL;
+		END IF;
+		IF	(DEL_nm	IS NULL OR DEL_nm = '-2147483647')
+		AND	(DEL_dm > '0000-00-00 00:00:00')
+		THEN
+			SET	DEL_nm	= CURRENT_USER();
+		ELSE
+			SET 	DEL_nm	= NULL;
+		END IF;
+		LEAVE VSP;
+	END IF;
+	IF
+		SYSRIGHT = 'DELETE'
+	THEN
+		IF	DEL_dm	IS NULL OR DEL_dm = '0000-00-00 00:00:00'
+		THEN
+			SET	DEL_dm	= UTC_TIMESTAMP();
+		END IF;
+		IF	DEL_nm	IS NULL OR DEL_nm = '-2147483647'
+		THEN
+			SET	DEL_nm	= CURRENT_USER();
+		END IF;
+		SET	UPD_dm	= UTC_TIMESTAMP();
+		SET	UPD_nm	= CURRENT_USER();
+		LEAVE VSP;
+	END IF;
+	#######################################################################
+END	VSP
+;
+###############################################################################
+END */$$
+DELIMITER ;
+
 /*Table structure for table `company` */
 
 DROP TABLE IF EXISTS `company`;
@@ -9694,6 +12055,31 @@ DROP TABLE IF EXISTS `tvwcompanytype`;
  `CompanyTypeOrder_id` int(11) 
 )*/;
 
+/*Table structure for table `tvwcontact` */
+
+DROP TABLE IF EXISTS `tvwcontact`;
+
+/*!50001 DROP VIEW IF EXISTS `tvwcontact` */;
+/*!50001 DROP TABLE IF EXISTS `tvwcontact` */;
+
+/*!50001 CREATE TABLE  `tvwcontact`(
+ `Contact_id` int(11) ,
+ `Contact_tp` varchar(64) ,
+ `Contact_tx` mediumtext ,
+ `ContactADD_dm` datetime ,
+ `ContactADD_nm` varchar(256) ,
+ `ContactUPD_dm` datetime ,
+ `ContactUPD_nm` varchar(256) ,
+ `ContactDEL_dm` datetime ,
+ `ContactDEL_nm` varchar(256) ,
+ `ParentContact_tp` varchar(64) ,
+ `ContactType_tx` mediumtext ,
+ `ContactTypeLeft_id` int(11) ,
+ `ContactTypeRight_id` int(11) ,
+ `ContactTypeLevel_id` int(11) ,
+ `ContactTypeOrder_id` int(11) 
+)*/;
+
 /*Table structure for table `tvwcontacttype` */
 
 DROP TABLE IF EXISTS `tvwcontacttype`;
@@ -9784,6 +12170,7 @@ DROP TABLE IF EXISTS `tvwresource_contact`;
  `Zip_cd` varchar(128) ,
  `Phone_cd` varchar(128) ,
  `GPS_cd` varchar(128) ,
+ `Resrc_tx` mediumtext ,
  `Contact_tx` mediumtext ,
  `ADD_dm` datetime ,
  `ADD_nm` varchar(256) ,
@@ -9931,6 +12318,13 @@ DROP TABLE IF EXISTS `tvwusertype`;
 
 /*!50001 CREATE ALGORITHM=UNDEFINED DEFINER=`innovella`@`localhost` SQL SECURITY DEFINER VIEW `tvwcompanytype` AS select `tblcompanytype`.`Company_tp` AS `Company_tp`,`tblresourcetype`.`ParentResrc_tp` AS `ParentCompany_tp`,`tblresourcetype`.`ResrcType_tx` AS `CompanyType_tx`,`tblresourcetype`.`Left_id` AS `CompanyTypeLeft_id`,`tblresourcetype`.`Right_id` AS `CompanyTypeRight_id`,`tblresourcetype`.`Level_id` AS `CompanyTypeLevel_id`,`tblresourcetype`.`Order_id` AS `CompanyTypeOrder_id` from (`tblcompanytype` join `tblresourcetype` on((`tblcompanytype`.`Company_tp` = `tblresourcetype`.`Resrc_tp`))) */;
 
+/*View structure for view tvwcontact */
+
+/*!50001 DROP TABLE IF EXISTS `tvwcontact` */;
+/*!50001 DROP VIEW IF EXISTS `tvwcontact` */;
+
+/*!50001 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `tvwcontact` AS select `tblresource`.`Resrc_id` AS `Contact_id`,`tblresource`.`Resrc_tp` AS `Contact_tp`,`tblresource`.`Resrc_tx` AS `Contact_tx`,`tblresource`.`ADD_dm` AS `ContactADD_dm`,`tblresource`.`ADD_nm` AS `ContactADD_nm`,`tblresource`.`UPD_dm` AS `ContactUPD_dm`,`tblresource`.`UPD_nm` AS `ContactUPD_nm`,`tblresource`.`DEL_dm` AS `ContactDEL_dm`,`tblresource`.`DEL_nm` AS `ContactDEL_nm`,`tvwcontacttype`.`ParentContact_tp` AS `ParentContact_tp`,`tvwcontacttype`.`ContactType_tx` AS `ContactType_tx`,`tvwcontacttype`.`ContactTypeLeft_id` AS `ContactTypeLeft_id`,`tvwcontacttype`.`ContactTypeRight_id` AS `ContactTypeRight_id`,`tvwcontacttype`.`ContactTypeLevel_id` AS `ContactTypeLevel_id`,`tvwcontacttype`.`ContactTypeOrder_id` AS `ContactTypeOrder_id` from (`tblresource` join `tvwcontacttype` on((`tblresource`.`Resrc_tp` = `tvwcontacttype`.`Contact_tp`))) */;
+
 /*View structure for view tvwcontacttype */
 
 /*!50001 DROP TABLE IF EXISTS `tvwcontacttype` */;
@@ -9957,7 +12351,7 @@ DROP TABLE IF EXISTS `tvwusertype`;
 /*!50001 DROP TABLE IF EXISTS `tvwresource_contact` */;
 /*!50001 DROP VIEW IF EXISTS `tvwresource_contact` */;
 
-/*!50001 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `tvwresource_contact` AS select `tblresource_contact`.`Resrc_id` AS `Resrc_id`,`tblresource_contact`.`Resrc_tp` AS `Resrc_tp`,`tblresource_contact`.`Contact_id` AS `Contact_id`,`tblresource_contact`.`Contact_tp` AS `Contact_tp`,`tblresource_contact`.`Contact_nm` AS `Contact_nm`,`tblresource_contact`.`Contact_cd` AS `Contact_cd`,`tblresource_contact`.`Alias_nm` AS `Alias_nm`,`tblresource_contact`.`Address_nm` AS `Address_nm`,`tblresource_contact`.`City_cd` AS `City_cd`,`tblresource_contact`.`State_cd` AS `State_cd`,`tblresource_contact`.`Zip_cd` AS `Zip_cd`,`tblresource_contact`.`Phone_cd` AS `Phone_cd`,`tblresource_contact`.`GPS_cd` AS `GPS_cd`,`tvwresource`.`Resrc_tx` AS `Contact_tx`,`tblresource_contact`.`ADD_dm` AS `ADD_dm`,`tblresource_contact`.`ADD_nm` AS `ADD_nm`,`tblresource_contact`.`UPD_dm` AS `UPD_dm`,`tblresource_contact`.`UPD_nm` AS `UPD_nm`,`tblresource_contact`.`DEL_dm` AS `DEL_dm`,`tblresource_contact`.`DEL_nm` AS `DEL_nm` from (`tblresource_contact` join `tvwresource` on(((`tblresource_contact`.`Resrc_id` = `tvwresource`.`Resrc_id`) and (`tblresource_contact`.`Resrc_tp` = `tvwresource`.`Resrc_tp`)))) */;
+/*!50001 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `tvwresource_contact` AS select `tblresource_contact`.`Resrc_id` AS `Resrc_id`,`tblresource_contact`.`Resrc_tp` AS `Resrc_tp`,`tblresource_contact`.`Contact_id` AS `Contact_id`,`tblresource_contact`.`Contact_tp` AS `Contact_tp`,`tblresource_contact`.`Contact_nm` AS `Contact_nm`,`tblresource_contact`.`Contact_cd` AS `Contact_cd`,`tblresource_contact`.`Alias_nm` AS `Alias_nm`,`tblresource_contact`.`Address_nm` AS `Address_nm`,`tblresource_contact`.`City_cd` AS `City_cd`,`tblresource_contact`.`State_cd` AS `State_cd`,`tblresource_contact`.`Zip_cd` AS `Zip_cd`,`tblresource_contact`.`Phone_cd` AS `Phone_cd`,`tblresource_contact`.`GPS_cd` AS `GPS_cd`,`tvwresource`.`Resrc_tx` AS `Resrc_tx`,`tvwcontact`.`Contact_tx` AS `Contact_tx`,`tblresource_contact`.`ADD_dm` AS `ADD_dm`,`tblresource_contact`.`ADD_nm` AS `ADD_nm`,`tblresource_contact`.`UPD_dm` AS `UPD_dm`,`tblresource_contact`.`UPD_nm` AS `UPD_nm`,`tblresource_contact`.`DEL_dm` AS `DEL_dm`,`tblresource_contact`.`DEL_nm` AS `DEL_nm` from ((`tblresource_contact` join `tvwresource` on(((`tblresource_contact`.`Resrc_id` = `tvwresource`.`Resrc_id`) and (`tblresource_contact`.`Resrc_tp` = `tvwresource`.`Resrc_tp`)))) join `tvwcontact` on(((`tblresource_contact`.`Contact_id` = `tvwcontact`.`Contact_id`) and (`tblresource_contact`.`Contact_tp` = `tvwcontact`.`Contact_tp`)))) */;
 
 /*View structure for view tvwresourcetype */
 
