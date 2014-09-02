@@ -12,6 +12,7 @@ INOUT	User_id		INT SIGNED		-- PK1
 ,	User_cd		VARCHAR(128)	
 ,	Alias_nm	VARCHAR(256)		--  AK2
 ,	Hashed_cd	VARCHAR(128)
+,	Person_nm	VARCHAR(256)
 ,	Email_nm	VARCHAR(256)
 ,	Challenge_cd	VARCHAR(128)
 ,	Response_cd	VARCHAR(128)
@@ -82,6 +83,7 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 	IF User_cd IS NULL OR User_cd = '' THEN SET ProcFailed_fg = TRUE;	END IF;
 	IF Alias_nm IS NULL OR Alias_nm = '' THEN SET Alias_nm = NULL;	END IF;
 	IF Email_nm IS NULL OR Email_nm = '' THEN SET ProcFailed_fg = TRUE;	END IF;
+	IF Person_nm IS NULL OR Person_nm = '' THEN SET Person_nm = NULL;	END IF;
 	IF Challenge_cd IS NULL OR Challenge_cd = '' THEN SET Challenge_cd = NULL;	END IF;
 	IF Response_cd IS NULL OR Response_cd = '' THEN SET Response_cd = NULL;	END IF;
 	IF Company_nm IS NULL OR Company_nm = '' THEN SET Company_nm = NULL;	END IF;
@@ -259,6 +261,7 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 		,	@User_nm	:= User_nm
 		,	@User_cd	:= User_cd
 		,	@Hashed_cd	:= Hashed_cd
+		,	@Person_nm	:= Person_nm
 		,	@Email_nm	:= Email_nm
 		,	@Challenge_cd	:= Challenge_cd
 		,	@Response_cd	:= Response_cd
@@ -340,6 +343,7 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 		,	@User_nm	:= User_nm
 		,	@User_cd	:= User_cd
 		,	@Hashed_cd	:= Hashed_cd
+		,	@Person_nm	:= Person_nm
 		,	@Email_nm	:= Email_nm
 		,	@Challenge_cd	:= Challenge_cd
 		,	@Response_cd	:= Response_cd
@@ -435,16 +439,17 @@ CALL	ispUser_Company
 ,	@User_tp	:= "User"
 ,	@Company_id
 ,	@Company_tp	:= "Company"
-,	@User_nm	:= "user1"
-,	@User_cd	:= "password"
-,	@Alias_nm	:= "test user1"
+,	@User_nm	:= "hsimpson"
+,	@User_cd	:= "mypass"
+,	@Alias_nm	:= "hsimpson"
 ,	@Hashed_cd	:= NULL
-,	@Email_nm	:= "tu1@vt.com"
+,	@Person_nm	:= "Homer Simpson"
+,	@Email_nm	:= "hsimpson@burns.com"
 ,	@Challenge_cd	:= "pet name"
 ,	@Response_cd	:= "Bentley"
 ,	@Company_nm := "PHP Company-1"
 ,	@Company_cd := NULL
-,	@User_tx	:= "test user 1"
+,	@User_tx	:= "Safety Inspector"
 ,	@Company_tx := NULL
 ,	@ADD_dm	:= NULL
 ,	@ADD_nm	:= NULL

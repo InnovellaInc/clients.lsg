@@ -12,6 +12,7 @@ CREATE PROCEDURE	gfpUser_Company
 ,	User_cd		VARCHAR(128)	
 ,	Alias_nm		VARCHAR(256)		--  AK2
 ,	Hashed_cd	VARCHAR(128)
+,	Person_nm	VARCHAR(256)
 ,	Email_nm	VARCHAR(256)
 ,	Challenge_cd	VARCHAR(128)
 ,	Response_cd	VARCHAR(128)
@@ -67,6 +68,7 @@ BEGIN
 	IF User_nm IS NULL OR User_nm = '' THEN SET User_nm = '-2147483647';	END IF;
 	IF User_cd IS NULL OR User_cd = '' THEN SET User_cd = '-2147483647';	END IF;
 	IF Hashed_cd IS NULL OR Hashed_cd = '' THEN SET Hashed_cd = '-2147483647';	END IF;
+	IF Person_nm IS NULL OR Person_nm = '' THEN SET Person_nm = '-2147483647';	END IF;
 	IF Alias_nm IS NULL OR Alias_nm = '' THEN SET Alias_nm = '-2147483647';	END IF;
 	IF Email_nm IS NULL OR Email_nm = '' THEN SET User_cd = '-2147483647';	END IF;
 	IF Challenge_cd IS NULL OR Challenge_cd = '' THEN SET Challenge_cd = '-2147483647';	END IF;
@@ -215,6 +217,10 @@ BEGIN
 		OR	Hashed_cd	= '-2147483647'
 			)
 		AND	(
+			tvwUser_Company.Person_nm	LIKE CONCAT('%', Person_nm, '%')
+		OR	Person_nm	= '-2147483647'
+			)
+		AND	(
 			tvwUser_Company.Email_nm	LIKE CONCAT('%', Email_nm, '%')
 		OR	Email_nm	= '-2147483647'
 			)
@@ -290,6 +296,7 @@ CALL gfpUser_Company
 ,	@User_cd	:= :User_cd
 ,	@Alias_nm	:= :Alias_nm
 ,	@Hashed_cd	:= :Hashed_cd
+,	@Person_nm	:= :Person_nm
 ,	@Email_nm	:= :Email_nm
 ,	@Challenge_cd	:= :Challenge_cd
 ,	@Response_cd	:= :Response_cd

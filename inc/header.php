@@ -27,6 +27,11 @@
 		     specific styles this will also ensure you retrain your customization with each SmartAdmin update.
 		<link rel="stylesheet" type="text/css" media="screen" href="<?php echo ASSETS_URL; ?>/css/your_style.css"> -->
 
+<!-- @START:Innovella -->
+		<link rel="stylesheet" type="text/css" media="screen" href="<?php echo ASSETS_URL; ?>/css/siteutil.css">
+		<link rel="stylesheet" type="text/css" media="screen" href="<?php echo ASSETS_URL; ?>/css/pwdwidget.css">
+<!-- @FINISH:Innovella -->
+
 		<?php
 
 			if ($page_css) {

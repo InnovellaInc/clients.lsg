@@ -347,6 +347,7 @@ CREATE OR REPLACE VIEW	tvwUser
 ,	User_nm
 ,	User_cd
 ,	Hashed_cd
+,	Person_nm
 ,	Email_nm
 ,	Challenge_cd
 ,	Response_cd
@@ -383,6 +384,7 @@ SELECT
 ,	tblUser.User_nm
 ,	tblUser.User_cd
 ,	tblUser.Hashed_cd
+,	tblUser.Person_nm
 ,	tblUser.Email_nm
 ,	tblUser.Challenge_cd
 ,	tblUser.Response_cd
@@ -468,7 +470,7 @@ SELECT
 
 ,	tvwCompany.Company_nm
 ,	tvwCompany.Company_cd
-,   tvwResource.Resrc_tx
+,	tvwResource.Resrc_tx
 ,	tvwCompany.Company_tx
 
 ,	tblResource_Company.ADD_dm
@@ -518,6 +520,7 @@ CREATE OR REPLACE VIEW	tvwUser_Company
 
 
 ,	Hashed_cd
+,	Person_nm
 ,	Email_nm
 ,	Challenge_cd
 ,	Response_cd
@@ -559,6 +562,7 @@ SELECT
 ,	tblResource_Company.Alias_nm
 
 ,	tvwUser.Hashed_cd
+,	tvwUser.Person_nm
 ,	tvwUser.Email_nm
 ,	tvwUser.Challenge_cd
 ,	tvwUser.Response_cd

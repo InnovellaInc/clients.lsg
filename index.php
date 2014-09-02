@@ -9,17 +9,16 @@ require_once("inc/config.ui.php");
 /*---------------- PHP Custom Scripts ---------
 
 YOU CAN SET CONFIGURATION VARIABLES HERE BEFORE IT GOES TO NAV, RIBBON, ETC. */
-// @LSG:START
-checkLogin();
-/*
-$loginURL = APP_URL . "/login.php";
 
-if ( isset( $_SESSION ) and $_SESSION["user"] == "" )
+require_once("inc/config.SiteUtil.php");
+
+if(!$siteutil->CheckLogin())
 {
-	header('location: ' . $loginURL);	//header('location: http://localhost:55619/login.php');
+    $siteutil->RedirectToURL("login.php");
+    exit;
 }
-// @LSG:FINISH
-*/
+
+
 /* ---------------- END PHP Custom Scripts ------------- */
 
 //include header

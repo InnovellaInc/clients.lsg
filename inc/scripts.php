@@ -21,6 +21,11 @@
 		<!-- IMPORTANT: APP CONFIG -->
 		<script src="js/app.config.js"></script>
 
+<!-- Form Validation -->
+<!-- @START:Innovella -->
+		<script src="<?php echo ASSETS_URL; ?>/js/libs/form.validation.js"></script> 
+<!-- @FINISH:Innovella -->
+
 		<!-- JS TOUCH : include this plugin for mobile drag / drop touch events-->
 		<script src="<?php echo ASSETS_URL; ?>/js/plugin/jquery-touch/jquery.ui.touch-punch.min.js"></script> 
 

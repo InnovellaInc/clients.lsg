@@ -1,4 +1,4 @@
-﻿DROP PROCEDURE IF EXISTS	vspUser
+DROP PROCEDURE IF EXISTS	vspUser
 ;
 
 DELIMITER //
@@ -9,6 +9,7 @@ CREATE PROCEDURE	vspUser
 ,	User_nm		VARCHAR(256)		
 ,	User_cd		VARCHAR(128)		
 ,	Hashed_cd	VARCHAR(128)
+,	Person_nm	VARCHAR(256)
 ,	Email_nm	VARCHAR(256)
 ,	Challenge_cd	VARCHAR(128)
 ,	Response_cd	VARCHAR(128)
@@ -76,6 +77,7 @@ BEGIN
 			,	@User_nm	:= User_nm
 			,	@User_cd	:= User_cd
 			,	@Hashed_cd	:= Hashed_cd
+			,	@Person_nm	:= Person_nm
 			,	@Email_nm	:= Email_nm
 			,	@Challenge_cd	:= Challenge_cd
 			,	@Response_cd	:= Response_cd

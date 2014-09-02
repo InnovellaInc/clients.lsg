@@ -1,4 +1,4 @@
-﻿DROP PROCEDURE IF EXISTS	ispUser
+DROP PROCEDURE IF EXISTS	ispUser
 ;
 
 DELIMITER //
@@ -9,6 +9,7 @@ INOUT	User_id		INT SIGNED		-- PK1
 ,	User_nm		VARCHAR(256)		--  AK2
 ,	User_cd		VARCHAR(128)	
 ,	Hashed_cd	VARCHAR(128)
+,	Person_nm	VARCHAR(256)
 ,	Email_nm	VARCHAR(256)
 ,	Challenge_cd	VARCHAR(128)
 ,	Response_cd	VARCHAR(128)
@@ -72,6 +73,7 @@ BEGIN
 		SET Hashed_cd = CONCAT(@salt, SHA(CONCAT(@salt, User_cd)));
 	END IF;
 	IF Email_nm IS NULL OR Email_nm = '' THEN SET ProcFailed_fg = TRUE;	END IF;
+	IF Person_nm IS NULL OR Person_nm = '' THEN SET Person_nm = NULL;	END IF;
 	IF Challenge_cd IS NULL OR Challenge_cd = '' THEN SET Challenge_cd = NULL;	END IF;
 	IF Response_cd IS NULL OR Response_cd = '' THEN SET Response_cd = NULL;	END IF;
 	IF User_tx IS NULL OR User_tx = '' THEN SET User_tx = NULL;	END IF;
@@ -114,6 +116,7 @@ BEGIN
 	,	@User_nm	:= User_nm
 	,	@User_cd	:= User_cd
 	,	@Hashed_cd	:= Hashed_cd
+	,	@Person_nm	:= Person_nm
 	,	@Email_nm	:= Email_nm
 	,	@Challenge_cd	:= Challenge_cd
 	,	@Response_cd	:= Response_cd
@@ -175,6 +178,7 @@ BEGIN
 	,	@User_nm	:= User_nm
 	,	@User_cd	:= User_cd
 	,	@Hashed_cd	:= Hashed_cd
+	,	@Person_nm	:= Person_nm
 	,	@Email_nm	:= Email_nm
 	,	@Challenge_cd	:= Challenge_cd
 	,	@Response_cd	:= Response_cd
@@ -340,6 +344,7 @@ BEGIN
 	,	User_nm
 	,	User_cd
 	,	Hashed_cd
+	,	Person_nm
 	,	Email_nm
 	,	Challenge_cd
 	,	Response_cd
@@ -351,6 +356,7 @@ BEGIN
 	,	User_nm
 	,	User_cd
 	,	Hashed_cd
+	,	Person_nm
 	,	Email_nm
 	,	Challenge_cd
 	,	Response_cd
@@ -389,6 +395,7 @@ CALL	ispUser
 ,	@User_nm	:= "user1"
 ,	@User_cd	:= "password"
 ,	@Hashed_cd	:= NULL
+,	@Person_nm	:= "Max Power"
 ,	@Email_nm	:= "tu1@vt.com"
 ,	@Challenge_cd	:= "pet name"
 ,	@Response_cd	:= "Bentley"

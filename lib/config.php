@@ -13,6 +13,41 @@ if(strpos($directory, $document_root)===0) {
 defined("APP_URL") ? null : define("APP_URL", str_replace("/lib", "", $base_url));
 //Assets URL, location of your css, img, js, etc. files
 defined("ASSETS_URL") ? null : define("ASSETS_URL", APP_URL);
+
+// @LSG:START
+defined( "DB_HOST" ) ? null : define( "DB_HOST", "localhost" );
+defined( "DB_DSN" ) ? null : define( "DB_DSN", "mysql:dbname=public_lsg" );
+defined( "DB_USERNAME" ) ? null : define( "DB_USERNAME", "innovella" );
+defined( "DB_PASSWORD" ) ? null : define( "DB_PASSWORD", "Innovella123" );
+defined( "DB_NAME" ) ? null : define( "DB_NAME", "public_lsg" );
+
+defined( "PAGE_SIZE" ) ? null : define( "PAGE_SIZE", 25 );
+defined( "TBL_RESOURCETYPE" ) ? null : define( "TBL_RESOURCETYPE", "resourcetype" );
+defined( "TBL_RESOURCE" ) ? null : define( "TBL_RESOURCE", "resource" );
+defined( "TBL_COMPANYTYPE" ) ? null : define( "TBL_COMPANYTYPE", "companytype" );
+defined( "TBL_USER" ) ? null : define( "TBL_USER", "user" );
+defined( "TBL_USERTYPE" ) ? null : define( "TBL_USERTYPE", "usertype" );
+defined( "TBL_CONTACT" ) ? null : define( "TBL_CONTACT", "contact" );
+defined( "TBL_CONTACTTYPE" ) ? null : define( "TBL_CONTACTTYPE", "contacttype" );
+defined( "TBL_RESOURCETYPE_COMPANYYPE" ) ? null : define( "TBL_RESOURCEYPE_COMPANYYPE", "resourcetype_companytype" );
+defined( "TBL_RESOURCE_COMPANY" ) ? null : define( "TBL_RESOURCE_COMPANY", "resource_company" );
+defined( "TBL_RESOURCE_LOCATION" ) ? null : define( "TBL_RESOURCE_LOCATION", "resource_location" );
+
+define( "ROOT_PATH", dirname( __FILE__ ));
+
+/**
+ * I18n support
+ */
+define( "DEFAULT_LOCALE", "en_US" );
+define( "DEFAULT_ENCODING", "UTF-8" );
+define( "DEFAULT_DOMAIN", "default" );
+
+putenv( "LC_ALL=" . DEFAULT_LOCALE );
+setlocale( LC_ALL, DEFAULT_LOCALE );
+
+bind_textdomain_codeset(DEFAULT_DOMAIN, DEFAULT_ENCODING);
+textdomain(DEFAULT_DOMAIN);
+// @LSG:FINISH
 // @LSG:START
 defined("SHORTCUT_URL") ? null : define("SHORTCUT_URL", str_replace("/lib", "/index.php#ajax", $base_url));
 

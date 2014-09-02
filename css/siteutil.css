@@ -1,0 +1,108 @@
+/*
+ * It is advised not to edit the smartadmin_production.css
+ * as this will override any changes you make in the 
+ * later versions of this theme. 
+ * 
+ * We advise that you use use this CSS to override 
+ * SmartAdmin styles. 
+ * 
+ * Rename the stylesheet to whatever your liking so it will stay
+ * unique to you with each update of SmartAdmin.
+ */
+
+/*
+ * INDEX
+ * 
+ * - HTML
+ * - BODY
+ * - CUSTOM STYLES
+ */
+/*
+	Registration/Login Form by 
+	Innovella, Inc.
+*/
+
+ #siteutil #scaptcha
+{
+  width:60px;
+  height:18px;
+}
+
+#siteutil .error
+{
+   font-family: Verdana, Arial, sans-serif; 
+   font-size: 0.7em;
+   color: #900;
+   background-color : #ffff00;
+}
+
+#siteutil #register_password_errorloc
+{
+    clear:both;
+}
+
+#siteutil  fieldset#antispam
+{
+   padding:2px;
+   border-top:1px solid #EEE;
+   border-left:0;
+   border-right:0;
+   border-bottom:0;
+   width:350px;
+}
+
+#siteutil fieldset#antispam legend
+{
+   font-family : Arial, sans-serif;
+   font-size: 0.8em;
+   font-weight:bold;
+   color:#333;   
+}
+
+#siteutil .short_explanation
+{
+   font-family : Arial, sans-serif;
+   font-size: 0.6em;
+   color:#333;   
+}
+
+/* spam_trap: This input is hidden. This is here to trick the spam bots*/
+#siteutil .spmhidip
+{
+   display:none;
+   width:10px;
+   height:3px;
+}
+#siteutil #fg_crdiv
+{
+   font-family : Arial, sans-serif;
+   font-size: 0.3em;
+   opacity: .2;
+   -moz-opacity: .2;
+   filter: alpha(opacity=20);   
+}
+#siteutil  #fg_crdiv p
+{
+    display:none;
+}
+
+#siteutil_content li
+{
+font-family : Arial, sans-serif;
+padding-top:10px;
+padding-bottom:10px;
+}
+#siteutil_content
+{
+    font-family : Arial, sans-serif;
+    font-size: 0.9em;
+    line-height: 150%
+}
+
+#siteutil_content h2
+{
+   font-family : Arial, sans-serif;
+   font-size: 1.5em;
+   font-weight:bold;
+   color:#333;
+}

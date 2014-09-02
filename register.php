@@ -13,6 +13,16 @@ E.G. $page_title = "Custom Title" */
 
 $page_title = "Register";
 
+require_once("inc/config.SiteUtil.php");
+
+if(isset($_POST['submitted']))
+{
+   if($siteutil->RegisterUser())
+   {
+        $siteutil->RedirectToURL("thank-you.html");
+   }
+}
+
 /* ---------------- END PHP Custom Scripts ------------- */
 
 //include header
@@ -46,30 +56,23 @@ include("inc/header.php");
 
 				<div class="row">
 					<div class="col-xs-12 col-sm-12 col-md-7 col-lg-7 hidden-xs hidden-sm">
-						<h1 class="txt-color-red login-header-big">SmartAdmin</h1>
+						<h1 class="txt-color-red login-header-big">Landscape Galleria</h1>
 						<div class="hero">
 
 							<div class="pull-left login-desc-box-l">
-								<h4 class="paragraph-header">It's Okay to be Smart. Experience the simplicity of SmartAdmin, everywhere you go!</h4>
-								<div class="login-app-icons">
-									<a href="javascript:void(0);" class="btn btn-danger btn-sm">Frontend Template</a>
-									<a href="javascript:void(0);" class="btn btn-danger btn-sm">Find out more</a>
-								</div>
+								<h4 class="paragraph-header">It's Okay to be Smart. Experience the simplicity of the Landscape Galleria, everywhere you go!</h4>
 							</div>
-							
-							<img src="<?php echo ASSETS_URL; ?>/img/demo/iphoneview.png" alt="" class="pull-right display-image" style="width:210px">
-							
 						</div>
 
 						<div class="row">
 							<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
-								<h5 class="about-heading">About SmartAdmin - Are you up to date?</h5>
+								<h5 class="about-heading">About Landscape Galleria - Are you up to date?</h5>
 								<p>
 									Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa.
 								</p>
 							</div>
 							<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
-								<h5 class="about-heading">Not just your average template!</h5>
+								<h5 class="about-heading">Not just your average project site!</h5>
 								<p>
 									Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi voluptatem accusantium!
 								</p>
@@ -77,37 +80,51 @@ include("inc/header.php");
 						</div>
 
 					</div>
-					<div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
+					<div id="siteutil" class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
 						<div class="well no-padding">
 
-							<form action="php/demo-register.php" id="smart-form-register" class="smart-form client-form">
+							<form id="register" action="<?php echo $siteutil->GetSelfScript(); ?>"  class="smart-form client-form" method="post" accept-charset="UTF-8">
 								<header>
 									Registration is FREE*
 								</header>
 
 								<fieldset>
+<!-- @START:Innovella -->
+	<input type='hidden' name='submitted' id='submitted' value='1'/>
+	<input type='text'  class='spmhidip' name='<?php echo $siteutil->GetSpamTrapInputName(); ?>' />
+	<div>
+<!--		<span class='error'><?php echo $siteutil->GetErrorMessage(); ?></span>-->
+	</div>
+<!-- @FINISH:Innovella -->
 									<section>
 										<label class="input"> <i class="icon-append fa fa-user"></i>
-											<input type="text" name="username" placeholder="Username">
+											<input type="text" id="Person_nm" name="Person_nm" placeholder="Your first and last name" value="<?php echo $siteutil->SafeDisplay('Person_nm') ?>">
 											<b class="tooltip tooltip-bottom-right">Needed to enter the website</b> </label>
 									</section>
 
 									<section>
 										<label class="input"> <i class="icon-append fa fa-envelope"></i>
-											<input type="email" name="email" placeholder="Email address">
+											<input type="email" id="Email_nm" name="Email_nm" placeholder="Email address" value="<?php echo $siteutil->SafeDisplay('Email_nm') ?>">
 											<b class="tooltip tooltip-bottom-right">Needed to verify your account</b> </label>
 									</section>
 
 									<section>
-										<label class="input"> <i class="icon-append fa fa-lock"></i>
-											<input type="password" name="password" placeholder="Password" id="password">
-											<b class="tooltip tooltip-bottom-right">Don't forget your password</b> </label>
+										<label class="input"> <i class="icon-append fa fa-user"></i>
+											<input type="text" id="User_nm" name="User_nm" placeholder="Username" value="<?php echo $siteutil->SafeDisplay('User_nm') ?>">
+											<b class="tooltip tooltip-bottom-right">Needed to enter the website</b> </label>
 									</section>
 
 									<section>
 										<label class="input"> <i class="icon-append fa fa-lock"></i>
-											<input type="password" name="passwordConfirm" placeholder="Confirm password">
+											<input type="password" id="User_cd" name="User_cd" placeholder="Password" id="User_cd">
 											<b class="tooltip tooltip-bottom-right">Don't forget your password</b> </label>
+<div class='pwdwidgetdiv' id='thepwddiv' ></div>
+									</section>
+
+									<section>
+										<label class="input"> <i class="icon-append fa fa-building"></i>
+											<input type="text" id="Company_nm" name="Company_nm" placeholder="Company Name" value="<?php echo $siteutil->SafeDisplay('Company_nm') ?>">
+											<b class="tooltip tooltip-bottom-right">Register the Company you work for here</b> </label>
 									</section>
 								</fieldset>
 
@@ -115,12 +132,12 @@ include("inc/header.php");
 									<div class="row">
 										<section class="col col-6">
 											<label class="input">
-												<input type="text" name="firstname" placeholder="First name">
+												<input type="text" id="Position_nm" name="Position_nm" placeholder="Job Title" value="<?php echo $siteutil->SafeDisplay('Position_nm') ?>">
 											</label>
 										</section>
 										<section class="col col-6">
 											<label class="input">
-												<input type="text" name="lastname" placeholder="Last name">
+												<input type="text" id="Phone_cd" name="Phone_cd" placeholder="Phone number" value="<?php echo $siteutil->SafeDisplay('Phone_cd') ?>">
 											</label>
 										</section>
 									</div>
@@ -128,16 +145,64 @@ include("inc/header.php");
 									<div class="row">
 										<section class="col col-6">
 											<label class="select">
-												<select name="gender">
-													<option value="0" selected="" disabled="">Gender</option>
-													<option value="1">Male</option>
-													<option value="2">Female</option>
-													<option value="3">Prefer not to answer</option>
+												<select id="Class_tp" name="Class_tp">
+													<option value="" selected="" disabled="">Company Class</option>
+													<option value="home owner">Home Owner</option>
+													<option value="home builder">Home Builder</option>
+													<option value="architect">Architect</option>
+													<option value="landscape architect">Landscape Architect</option>
+													<option value="supplier">Supplier</option>
+													<option value="garden designer">Garden Designer</option>
+													<option value="general contractor">General Contractor</option>
+													<option value="a-general-engineering">A-General Engineering Contractor</option>
+													<option value="b-general-building">B-General Building Contractor</option>
+													<option value="c2-insulation-and-acoustical">C2-Insulation and Acoustical Contractor</option>
+													<option value="c4-boiler-hot-water-heating">C4-Boiler, Hot Water Heating and Steam Fitting Contractor</option>
+													<option value="c5-framing-rough-carpentry">C5-Framing and Rough Carpentry Contractor</option>
+													<option value="c6-cabinet-millwork-finish-carpentry">C6-Cabinet, Millwork and Finish Carpentry Contractor</option>
+													<option value="c7-low-voltage-systems">C7-Low Voltage Systems Contractor</option>
+													<option value="c8-concrete">C8-Concrete Contractor</option>
+													<option value="c9-drywall">C9-Drywall Contractor</option>
+													<option value="c10-electrical">C10-Electrical Contractor</option>
+													<option value="c11-elevator">C11-Elevator Contractor</option>
+													<option value="c12-earthwork-paving">C12-Earthwork and Paving Contractors</option>
+													<option value="c13-fencing">C13-Fencing Contractor</option>
+													<option value="c14-metal-roofing">C14-Metal Roofing Contractor</option>
+													<option value="c15-flooring-and-floor-covering">C15-Flooring and Floor Covering Contractors</option>
+													<option value="c16-fire-protection">C16-Fire Protection Contractor</option>
+													<option value="c17-glazing">C17-Glazing Contractor</option>
+													<option value="c20-warm-air-heating-ventilating-and-air-conditioning">C20-Warm-Air Heating, Ventilating and Air-Conditioning Contractor</option>
+													<option value="c21-building-moving-demolition">C21-Building Moving/Demolition Contractor</option>
+													<option value="c23-ornamental-metal">C23-Ornamental Metal Contractor</option>
+													<option value="c26-lathing-contractor">C26-Lathing Contractor</option>
+													<option value="c27-landscaping">C27-Landscaping Contractor</option>
+													<option value="c28-lock-and-security-equipment">C28-Lock and Security Equipment Contractor</option>
+													<option value="c29-masonry">C29-Masonry Contractor</option>
+													<option value="c31-construction-zone-traffic-control">C31-Construction Zone Traffic Control Contractor</option>
+													<option value="c32-parking and-highway-improvement">C32-Parking and Highway Improvement Contractor</option>
+													<option value="c33-painting-and-decorating">C33-Painting and Decorating Contractor</option>
+													<option value="c34-pipeline">C34-Pipeline Contractor</option>
+													<option value="c35-lathing-and-plastering">C35-Lathing and Plastering Contractor</option>
+													<option value="c36-plumbing">C36-Plumbing Contractor</option>
+													<option value="c38-refrigeration">C38-Refrigeration Contractor</option>
+													<option value="c39-roofing">C39-Roofing Contractor</option>
+													<option value="c42-sanitation-system">C42-Sanitation System Contractor</option>
+													<option value="c43-sheet-metal">C43-Sheet Metal Contractor</option>
+													<option value="c45-electrical-sign">C45-Electrical Sign Contractor</option>
+													<option value="c46-solar">C46-Solar Contractor</option>
+													<option value="c47-manufactured-housing">C47-Manufactured Housing Contractor</option>
+													<option value="c50-reinforcing-steel">C50-Reinforcing Steel Contractor</option>
+													<option value="c51-structural-steel">C51-Structural Steel Contractor</option>
+													<option value="c53-swimming-pool">C53-Swimming Pool Contractor</option>
+													<option value="c54-ceramic-and-mosaic-tile">C54-Ceramic and Mosaic Tile Contractor</option>
+													<option value="c55-water-conditioning">C55-Water Conditioning Contractor</option>
+													<option value="c57-water-well-drilling">C57-Water Well Drilling Contractor</option>
+													<option value="c60-welding">C60-Welding Contractor</option>
 												</select> <i></i> </label>
 										</section>
 										<section class="col col-6">
-											<label class="input"> <i class="icon-append fa fa-calendar"></i>
-												<input type="text" name="request" placeholder="Request activation on" class="datepicker" data-dateformat='dd/mm/yy'>
+											<label class="input">
+												<input type="text" id="license" name="license" placeholder="License number" value="<?php echo $siteutil->SafeDisplay('license') ?>">
 											</label>
 										</section>
 									</div>
@@ -152,7 +217,7 @@ include("inc/header.php");
 									</section>
 								</fieldset>
 								<footer>
-									<button type="submit" class="btn btn-primary">
+									<button type="submit" name="Submit" class="btn btn-primary" value="Submit">
 										Register
 									</button>
 								</footer>
@@ -166,19 +231,6 @@ include("inc/header.php");
 							</form>
 
 						</div>
-						<p class="note text-center">*FREE Registration ends on October 2015.</p>
-						<h5 class="text-center">- Or sign in using -</h5>
-						<ul class="list-inline text-center">
-							<li>
-								<a href="javascript:void(0);" class="btn btn-primary btn-circle"><i class="fa fa-facebook"></i></a>
-							</li>
-							<li>
-								<a href="javascript:void(0);" class="btn btn-info btn-circle"><i class="fa fa-twitter"></i></a>
-							</li>
-							<li>
-								<a href="javascript:void(0);" class="btn btn-warning btn-circle"><i class="fa fa-linkedin"></i></a>
-							</li>
-						</ul>
 					</div>
 				</div>
 			</div>
@@ -421,35 +473,36 @@ Contractology supply a wide variety of commercial legal documents, such as <a hr
 	// Validation
 	$(function() {
 		// Validation
-		$("#smart-form-register").validate({
+		$("#register").validate({
 
 			// Rules for form validation
-			rules : {
-				username : {
+			rules :
+			{
+				Person_nm : {
 					required : true
 				},
-				email : {
+				User_nm : {
+					required : true
+				},
+				Email_nm : {
 					required : true,
 					email : true
 				},
-				password : {
+				User_cd : {
 					required : true,
-					minlength : 3,
+					minlength : 6,
 					maxlength : 20
 				},
-				passwordConfirm : {
-					required : true,
-					minlength : 3,
-					maxlength : 20,
-					equalTo : '#password'
-				},
-				firstname : {
+				Company_nm : {
 					required : true
 				},
-				lastname : {
+				Position_nm : {
 					required : true
 				},
-				gender : {
+				Phone_cd : {
+					required : true
+				},
+				Class_tp : {
 					required : true
 				},
 				terms : {
@@ -458,29 +511,32 @@ Contractology supply a wide variety of commercial legal documents, such as <a hr
 			},
 
 			// Messages for form validation
-			messages : {
-				login : {
-					required : 'Please enter your login'
+			messages : 
+			{
+				Person_nm : {
+					required : 'Please enter your full name (first and last)'
 				},
-				email : {
+				User_nm : {
+					required : 'Please enter a user name for account login'
+				},
+				Email_nm : {
 					required : 'Please enter your email address',
 					email : 'Please enter a VALID email address'
 				},
-				password : {
+				User_cd : {
 					required : 'Please enter your password'
 				},
-				passwordConfirm : {
-					required : 'Please enter your password one more time',
-					equalTo : 'Please enter the same password as above'
+				Company_nm : {
+					required : 'Please enter the name of your company'
 				},
-				firstname : {
-					required : 'Please select your first name'
+				Position_nm : {
+					required : 'Please enter your job title at this company'
 				},
-				lastname : {
-					required : 'Please select your last name'
+				Phone_cd : {
+					required : 'Please enter a phone number we can reach you at'
 				},
-				gender : {
-					required : 'Please select your gender'
+				Class_tp : {
+					required : 'Please select your company classification'
 				},
 				terms : {
 					required : 'You must agree with Terms and Conditions'

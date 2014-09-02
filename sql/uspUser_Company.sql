@@ -12,6 +12,7 @@ CREATE PROCEDURE	uspUser_Company
 ,	User_cd		VARCHAR(128)	
 ,	Alias_nm	VARCHAR(256)		--  AK2
 ,	Hashed_cd	VARCHAR(128)
+,	Person_nm	VARCHAR(256)
 ,	Email_nm	VARCHAR(256)
 ,	Challenge_cd	VARCHAR(128)
 ,	Response_cd	VARCHAR(128)
@@ -81,6 +82,7 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 	IF User_nm IS NULL OR User_nm = '' THEN SET User_nm = '-2147483647';	END IF;
 	IF User_cd IS NULL OR User_cd = '' THEN SET User_cd = '-2147483647';	END IF;
 	IF Hashed_cd IS NULL OR Hashed_cd = '' THEN SET Hashed_cd = '-2147483647';	END IF;
+	IF Person_nm IS NULL OR Person_nm = '' THEN SET Person_nm = '-2147483647';	END IF;
 	IF Alias_nm IS NULL OR Alias_nm = '' THEN SET Alias_nm = '-2147483647';	END IF;
 	IF Email_nm IS NULL OR Email_nm = '' THEN SET User_cd = '-2147483647';	END IF;
 	IF Challenge_cd IS NULL OR Challenge_cd = '' THEN SET Challenge_cd = '-2147483647';	END IF;
@@ -215,6 +217,7 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 		,	@User_nm	:= User_nm
 		,	@User_cd	:= User_cd
 		,	@Hashed_cd	:= Hashed_cd
+		,	@Person_nm	:= Person_nm
 		,	@Email_nm	:= Email_nm
 		,	@Challenge_cd	:= Challenge_cd
 		,	@Response_cd	:= Response_cd
@@ -297,6 +300,7 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 		,	@User_nm	:= User_nm
 		,	@User_cd	:= User_cd
 		,	@Hashed_cd	:= Hashed_cd
+		,	@Person_nm	:= Person_nm
 		,	@Email_nm	:= Email_nm
 		,	@Challenge_cd	:= Challenge_cd
 		,	@Response_cd	:= Response_cd
@@ -367,23 +371,23 @@ DELIMITER ;
 ;
 
 /*
-SET @User_id = NULL; SET @Company_id = NULL;
 CALL	uspUser_Company
 (
-	@User_id
+	@User_id	:= 79
 ,	@User_tp	:= "User"
-,	@Company_id
+,	@Company_id	:= 9
 ,	@Company_tp	:= "Company"
-,	@User_nm	:= "user1"
-,	@User_cd	:= "password"
-,	@Alias_nm	:= "test user1"
+,	@User_nm	:= "hsimpson"
+,	@User_cd	:= "mypass"
+,	@Alias_nm	:= "hsimpson"
 ,	@Hashed_cd	:= NULL
-,	@Email_nm	:= "tu1@vt.com"
+,	@Person_nm	:= "Homer Simpson"
+,	@Email_nm	:= "hsimpson@burns.com"
 ,	@Challenge_cd	:= "pet name"
 ,	@Response_cd	:= "Bentley"
 ,	@Company_nm := "PHP Company-1"
 ,	@Company_cd := NULL
-,	@User_tx	:= "test user 1"
+,	@User_tx	:= "Safety Inspector"
 ,	@Company_tx := NULL
 ,	@ADD_dm	:= NULL
 ,	@ADD_nm	:= NULL
