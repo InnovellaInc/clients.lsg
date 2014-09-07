@@ -39,12 +39,12 @@ include("inc/header.php");
 	<!--<span id="logo"></span>-->
 
 	<div id="logo-group">
-		<span id="logo"> <img src="<?php echo ASSETS_URL; ?>/img/logo.png" alt="SmartAdmin"> </span>
+		<span id="logo"> <img src="<?php echo ASSETS_URL; ?>/img/logo.png" alt="Landscape Galleria"> </span>
 
 		<!-- END AJAX-DROPDOWN -->
 	</div>
 
-	<span id="extr-page-header-space"> <span class="hidden-mobile">Need an account?</span> <a href="<?php echo APP_URL; ?>/register.php" class="btn btn-danger">Creat account</a> </span>
+	<span id="extr-page-header-space"> <span class="hidden-mobile">Need an account?</span> <a href="<?php echo APP_URL; ?>/register.php" class="btn btn-danger">Create account</a> </span>
 
 </header>
 
@@ -55,11 +55,11 @@ include("inc/header.php");
 
 		<div class="row">
 			<div class="col-xs-12 col-sm-12 col-md-7 col-lg-8 hidden-xs hidden-sm">
-				<h1 class="txt-color-red login-header-big">SmartAdmin</h1>
+				<h1 class="txt-color-red login-header-big">Landscape Galleria</h1>
 				<div class="hero">
 
 					<div class="pull-left login-desc-box-l">
-						<h4 class="paragraph-header">It's Okay to be Smart. Experience the simplicity of SmartAdmin, everywhere you go!</h4>
+						<h4 class="paragraph-header">It's Okay to be Smart. Experience the simplicity of Landscape Galleria, everywhere you go!</h4>
 						<div class="login-app-icons">
 							<a href="javascript:void(0);" class="btn btn-danger btn-sm">Frontend Template</a>
 							<a href="javascript:void(0);" class="btn btn-danger btn-sm">Find out more</a>
@@ -72,7 +72,7 @@ include("inc/header.php");
 
 				<div class="row">
 					<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
-						<h5 class="about-heading">About SmartAdmin - Are you up to date?</h5>
+						<h5 class="about-heading">About Landscape Galleria - Are you up to date?</h5>
 						<p>
 							Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa.
 						</p>
@@ -87,21 +87,22 @@ include("inc/header.php");
 
 			</div>
 			<div class="col-xs-12 col-sm-12 col-md-5 col-lg-4">
-				<div class="well no-padding">
+				<div id="siteutil" class="well no-padding">
 					<form id="login-form" class="smart-form client-form" action="<?php echo $siteutil->GetSelfScript(); ?>" method="post" accept-charset="UTF-8">
 						<header>
 							Sign In
 						</header>
 
 						<fieldset>
+<!-- @START:Innovella -->
 <input type='hidden' name='submitted' id='submitted' value='1'/>
-<div>
-	<span class='error'><?php echo $siteutil->GetErrorMessage(); ?></span>
+<div id="login-error" class="alert" data-dismiss="alert"><?php echo $siteutil->GetErrorMessage(); ?>
 </div>
+<!-- @FINISH:Innovella -->
 							<section>
 								<label class="label">UserName</label>
 								<label class="input"> <i class="icon-append fa fa-user"></i>
-									<input type="text" name="username" id="username" value="<?php echo $siteutil->SafeDisplay('username') ?>" maxlength="50">
+									<input type="text" name="User_nm" id="User_nm" value="<?php echo $siteutil->SafeDisplay('User_nm') ?>" maxlength="50">
 									<b class="tooltip tooltip-top-right"><i class="fa fa-user txt-color-teal"></i> Please enter your UserName</b></label>
 <span id='login_username_errorloc' class='error'></span>
 							</section>
@@ -109,7 +110,7 @@ include("inc/header.php");
 							<section>
 								<label class="label">Password</label>
 								<label class="input"> <i class="icon-append fa fa-lock"></i>
-									<input type="password" name="password" id="password" maxlength="50">
+									<input type="password" name="User_cd" id="User_cd" maxlength="50">
 									<b class="tooltip tooltip-top-right"><i class="fa fa-lock txt-color-teal"></i> Enter your password</b> </label>
 <span id='login_password_errorloc' class='error'></span>
 								<div class="note">
@@ -131,20 +132,6 @@ include("inc/header.php");
 					</form>
 
 				</div>
-				
-				<h5 class="text-center"> - Or sign in using -</h5>
-													
-								<ul class="list-inline text-center">
-									<li>
-										<a href="javascript:void(0);" class="btn btn-primary btn-circle"><i class="fa fa-facebook"></i></a>
-									</li>
-									<li>
-										<a href="javascript:void(0);" class="btn btn-info btn-circle"><i class="fa fa-twitter"></i></a>
-									</li>
-									<li>
-										<a href="javascript:void(0);" class="btn btn-warning btn-circle"><i class="fa fa-linkedin"></i></a>
-									</li>
-								</ul>
 				
 			</div>
 		</div>
@@ -169,34 +156,28 @@ include("inc/header.php");
 		// Validation
 		$("#login-form").validate({
 			// Rules for form validation
-			rules : {
-				username : {
+			rules : 
+			{
+				User_nm : {
 					required : true,
 					minlength : 3,
 					maxlength : 50
 				},
-				password : {
+				User_cd : {
 					required : true,
 					minlength : 6,
 					maxlength : 50
-				},
-				email : {
-					required : true,
-					email : true
 				}
 			},
 
 			// Messages for form validation
-			messages : {
-				username : {
+			messages : 
+			{
+				User_nm : {
 					required : 'Please enter your username'
 				},
-				password : {
+				User_cd : {
 					required : 'Please enter your password'
-				},
-				email : {
-					required : 'Please enter your email address',
-					email : 'Please enter a VALID email address'
 				}
 			},
 
@@ -213,9 +194,9 @@ include("inc/header.php");
     frmvalidator.EnableOnPageErrorDisplay();
     frmvalidator.EnableMsgsTogether();
 
-    frmvalidator.addValidation("username","req","Please provide your username");
+    frmvalidator.addValidation("User_nm","req","Please provide your username");
     
-    frmvalidator.addValidation("password","req","Please provide the password");
+    frmvalidator.addValidation("User_cd","req","Please provide the password");
 
 // ]]>
 

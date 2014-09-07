@@ -6,13 +6,13 @@ require_once __DIR__ . "\class.DataAccessObject.php";
 require __DIR__ . "\class.PDODebugger.php";
 
 /** 
- * The Company class. The Company class maps the database Company object to the application Company object.  
+ * The User_Company class. The Company class maps the database Company object to the application Company object.  
  USE:
-	require_once __DIR__ . "\lib\class.Company.php";
+	require_once __DIR__ . "\lib\class.User_Company.php";
 	$objCompany = null;
-	$objCompany = new Company();
-	$objCompany->User_tp = "Company";
-	$objCompanySet = Company::select( $objCompany );
+	$objCompany = new User_Company();
+	$objCompany->User_tp = "User";
+	$objCompanySet = User_Company::select( $objCompany );
  *  
  */ 
 class User_Company
@@ -67,6 +67,12 @@ class User_Company
 	{ return htmlspecialchars( $this->_Hashed_cd ); }
 	public function setHashed_cd ( $val )
 	{ $this->_Hashed_cd = $val; }
+
+	private $_Person_nm = "";
+	public function getPerson_nm ()
+	{ return htmlspecialchars( $this->_Person_nm ); }
+	public function setPerson_nm ( $val )
+	{ $this->_Person_nm = mysql_real_escape_string ( $val ); }
 
 	private $_Email_nm = "";
 	public function getEmail_nm ()
@@ -128,7 +134,7 @@ class User_Company
 	public function setRowCount ( $val )
 	{ $this->_RowCount = $val; }
 
-	private static $_Rows = NULL;
+	private static $_Rows = 0;
 	public function getRows ()
 	{ return $this->_Rows; }
 	public function setRows ( $val )
@@ -161,6 +167,7 @@ class User_Company
 		$this->User_cd = "";
 		$this->Alias_nm = "";
 		$this->Hashed_cd = "";
+		$this->Person_nm = "";
 		$this->Email_nm = "";
 		$this->Challenge_cd = "";
 		$this->Response_cd = "";
@@ -171,7 +178,7 @@ class User_Company
 		$this->Key_cd = "AL";
 		$this->Mode_cd = "C";
 		$this->RowCount = 0;
-		$this->Rows = NULL;
+		$this->Rows = 0;
 	}
 /**
 *	SELECT
@@ -191,6 +198,7 @@ CALL gfpUser_Company
 ,	@User_cd	:= :User_cd
 ,	@Alias_nm	:= :Alias_nm
 ,	@Hashed_cd	:= :Hashed_cd
+,	@Person_nm	:= :Person_nm
 ,	@Email_nm	:= :Email_nm
 ,	@Challenge_cd	:= :Challenge_cd
 ,	@Response_cd	:= :Response_cd
@@ -221,6 +229,7 @@ CALL gfpUser_Company
 			$st->bindValue( ":User_cd", $obj->User_cd, PDO::PARAM_STR );
 			$st->bindValue( ":Alias_nm", $obj->Alias_nm, PDO::PARAM_STR );
 			$st->bindValue( ":Hashed_cd", $obj->Hashed_cd, PDO::PARAM_STR );
+			$st->bindValue( ":Person_nm", $obj->Person_nm, PDO::PARAM_STR );
 			$st->bindValue( ":Email_nm", $obj->Alias_nm, PDO::PARAM_STR );
 			$st->bindValue( ":Challenge_cd", $obj->Challenge_cd, PDO::PARAM_STR );
 			$st->bindValue( ":Response_cd", $obj->Response_cd, PDO::PARAM_STR );
@@ -235,13 +244,14 @@ CALL gfpUser_Company
 			if ( $obj->RowCount <= 0 )
 			{
 				$st->closeCursor();
+				return ( $obj->RowCount );
 				exit();
 			}
 			$obj->Rows = $st->fetchALL( PDO::FETCH_OBJ );
 			$st->closeCursor();
 			DataAccessObject::disconnect( $conn );
 
-			return ($obj->Rows);
+			return ( $obj->Rows );
 		}
 		catch( PDOException $e)
 		{
@@ -269,6 +279,7 @@ CALL ispUser_Company
 ,	@User_cd	:= :User_cd
 ,	@Alias_nm	:= :Alias_nm
 ,	@Hashed_cd	:= :Hashed_cd
+,	@Person_nm	:= :Person_nm
 ,	@Email_nm	:= :Email_nm
 ,	@Challenge_cd	:= :Challenge_cd
 ,	@Response_cd	:= :Response_cd
@@ -306,6 +317,7 @@ CALL ispUser_Company
 			$st->bindParam( ":User_cd", $obj->User_cd, PDO::PARAM_STR );
 			$st->bindParam( ":Alias_nm", $obj->Alias_nm, PDO::PARAM_STR );
 			$st->bindParam( ":Hashed_cd", $obj->Hashed_cd, PDO::PARAM_STR );
+			$st->bindValue( ":Person_nm", $obj->Person_nm, PDO::PARAM_STR );
 			$st->bindParam( ":Email_nm", $obj->Alias_nm, PDO::PARAM_STR );
 			$st->bindParam( ":Challenge_cd", $obj->Challenge_cd, PDO::PARAM_STR );
 			$st->bindParam( ":Response_cd", $obj->Response_cd, PDO::PARAM_STR );
@@ -322,6 +334,7 @@ CALL ispUser_Company
 			if ( $RowCount <= 0 )
 			{
 				$st->closeCursor();
+				return ( $obj->RowCount );
 				exit();
 			}
 
@@ -355,6 +368,7 @@ CALL uspUser_Company
 ,	@User_cd	:= :User_cd
 ,	@Alias_nm	:= :Alias_nm
 ,	@Hashed_cd	:= :Hashed_cd
+,	@Person_nm	:= :Person_nm
 ,	@Email_nm	:= :Email_nm
 ,	@Challenge_cd	:= :Challenge_cd
 ,	@Response_cd	:= :Response_cd
@@ -385,6 +399,7 @@ CALL uspUser_Company
 			$st->bindParam( ":User_cd", $obj->User_cd, PDO::PARAM_STR );
 			$st->bindParam( ":Alias_nm", $obj->Alias_nm, PDO::PARAM_STR );
 			$st->bindParam( ":Hashed_cd", $obj->Hashed_cd, PDO::PARAM_STR );
+			$st->bindParam( ":Person_nm", $obj->Person_nm, PDO::PARAM_STR );
 			$st->bindParam( ":Email_nm", $obj->Alias_nm, PDO::PARAM_STR );
 			$st->bindParam( ":Challenge_cd", $obj->Challenge_cd, PDO::PARAM_STR );
 			$st->bindParam( ":Response_cd", $obj->Response_cd, PDO::PARAM_STR );

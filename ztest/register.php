@@ -13,7 +13,7 @@ E.G. $page_title = "Custom Title" */
 
 $page_title = "Register";
 
-require_once( "inc/config.SiteUtil.php" );
+require_once("inc/config.SiteUtil.php");
 
 if(isset($_POST['submitted']))
 {
@@ -90,10 +90,12 @@ include("inc/header.php");
 
 								<fieldset>
 <!-- @START:Innovella -->
-<input type='hidden' name='submitted' id='submitted' value='1'/>
-<input type='text'  class='spmhidip' name='<?php echo $siteutil->GetSpamTrapInputName(); ?>' />
-<div id="resgister-error" class="alert" data-dismiss="alert"><?php echo $siteutil->GetErrorMessage(); ?>
-</div>
+	<input type='hidden' name='submitted' id='submitted' value='1'/>
+	<input type='text'  class='spmhidip' name='<?php echo $siteutil->GetSpamTrapInputName(); ?>' />
+	<div class="alert alert-danger fade in">
+	<i class="fa fa-fw fa-lg fa-exclamation"></i>
+		<span><strong>Error </strong><p><?php echo $siteutil->GetErrorMessage(); ?></p></span>
+	</div>
 <!-- @FINISH:Innovella -->
 									<section>
 										<label class="input"> <i class="icon-append fa fa-user"></i>
@@ -446,6 +448,7 @@ Contractology supply a wide variety of commercial legal documents, such as <a hr
 		</div><!-- /.modal -->
 
 <!-- ==========================CONTENT ENDS HERE ========================== -->
+
 <?php 
 	//include required scripts
 	include("inc/scripts.php"); 

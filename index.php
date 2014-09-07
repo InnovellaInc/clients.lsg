@@ -10,11 +10,11 @@ require_once("inc/config.ui.php");
 
 YOU CAN SET CONFIGURATION VARIABLES HERE BEFORE IT GOES TO NAV, RIBBON, ETC. */
 
-require_once("inc/config.SiteUtil.php");
+require_once( "inc/config.SiteUtil.php" );
 
-if(!$siteutil->CheckLogin())
+if( !$siteutil->CheckLogin())
 {
-    $siteutil->RedirectToURL("login.php");
+    $siteutil->RedirectToURL( "login.php" );
     exit;
 }
 

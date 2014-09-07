@@ -18,7 +18,7 @@ http://www.html-form-guide.com/php-form/php-registration-form.html
 http://www.html-form-guide.com/php-form/php-login-form.html
 
 */
-require_once __DIR__ . "/class.phpmailer.php";
+require_once __DIR__ . "/PHPMailerAutoload.php";
 require_once __DIR__ . "/class.formvalidator.php";
 
 class SiteUtil
@@ -51,17 +51,18 @@ class SiteUtil
         $this->tablename = $tablename;
         
     }
-    function SetAdminEmail($email)
+
+    function SetAdminEmail( $email )
     {
         $this->admin_email = $email;
     }
     
-    function SetWebsiteName($sitename)
+    function SetWebsiteName( $sitename )
     {
         $this->sitename = $sitename;
     }
     
-    function SetRandomKey($key)
+    function SetRandomKey( $key )
     {
         $this->rand_key = $key;
     }
@@ -69,32 +70,33 @@ class SiteUtil
     //-------Main Operations ----------------------
     function RegisterUser()
     {
-        if(!isset($_POST['submitted']))
+        if( !isset( $_POST['submitted'] ) )
         {
            return false;
         }
         
         $formvars = array();
         
-        if(!$this->ValidateRegistrationSubmission())
+        if( !$this->ValidateRegistrationSubmission() )
         {
             return false;
         }
         
-        $this->CollectRegistrationSubmission($formvars);
+        $this->CollectRegistrationSubmission( $formvars );
         
-        if(!$this->SaveToDatabase($formvars))
-        {
-            return false;
-        }
-        
-        if(!$this->SendUserConfirmationEmail($formvars))
+        if( !$this->SaveToDatabase( $formvars ) )
         {
             return false;
         }
 
-        $this->SendAdminIntimationEmail($formvars);
+        if(!$this->SendUserConfirmationEmail($formvars))
+        {
+            return false;
+        }
         
+/*
+        $this->SendAdminIntimationEmail($formvars);
+*/        
         return true;
     }
 
@@ -112,35 +114,37 @@ class SiteUtil
         }
         
         $this->SendUserWelcomeEmail($user_rec);
-        
+/*        
         $this->SendAdminIntimationOnRegComplete($user_rec);
-        
+*/        
         return true;
     }    
     
     function Login()
     {
-        if(empty($_POST['username']))
+        if( empty( $_POST["User_nm"] ) )
         {
-            $this->HandleError("UserName is empty!");
+            $this->HandleError( "UserName is empty!" );
             return false;
         }
         
-        if(empty($_POST['password']))
+        if( empty( $_POST["User_cd"] ) )
         {
             $this->HandleError("Password is empty!");
             return false;
         }
         
-        $username = trim($_POST['username']);
-        $password = trim($_POST['password']);
+        $username = trim( $_POST["User_nm"] );
+        $password = trim( $_POST["User_cd"] );
         
-        if(!isset($_SESSION)){ session_start(); }
-        if(!$this->CheckLoginInDB($username,$password))
+        if( !isset( $_SESSION ) )
+			session_start();
+
+        if( !$this->CheckLoginInDB( $username, $password ) )
         {
             return false;
         }
-        
+
         $_SESSION[$this->GetLoginSessionVar()] = $username;
         
         return true;
@@ -148,30 +152,41 @@ class SiteUtil
     
     function CheckLogin()
     {
-         if(!isset($_SESSION)){ session_start(); }
+		if( !isset( $_SESSION ) )
+		{
+			session_start();
+		}
 
          $sessionvar = $this->GetLoginSessionVar();
          
-         if(empty($_SESSION[$sessionvar]))
+         if( empty( $_SESSION[$sessionvar] ) )
          {
             return false;
          }
          return true;
     }
     
+	function UserRows()
+	{
+		return isset( $_SESSION["UserRows"] ) ? $_SESSION["UserRows"]:'';
+	}
+
     function UserFullName()
     {
-        return isset($_SESSION['name_of_user'])?$_SESSION['name_of_user']:'';
+        return isset( $_SESSION["Person_nm"] ) ? $_SESSION["Person_nm"]:'';
     }
     
     function UserEmail()
     {
-        return isset($_SESSION['email_of_user'])?$_SESSION['email_of_user']:'';
+        return isset( $_SESSION["Email_nm"] ) ? $_SESSION["Email_nm"]:'';
     }
     
     function LogOut()
     {
-        session_start();
+		if( !isset( $_SESSION ) )
+		{
+			session_start();
+		}
         
         $sessionvar = $this->GetLoginSessionVar();
         
@@ -288,13 +303,13 @@ class SiteUtil
         return htmlentities($_SERVER['PHP_SELF']);
     }    
     
-    function SafeDisplay($value_name)
+    function SafeDisplay( $value_name )
     {
         if(empty($_POST[$value_name]))
         {
             return'';
         }
-        return htmlentities($_POST[$value_name]);
+        return htmlentities( $_POST[$value_name] );
     }
     
     function RedirectToURL($url)
@@ -314,7 +329,7 @@ class SiteUtil
         {
             return '';
         }
-        $errormsg = nl2br(htmlentities($this->error_message));
+        $errormsg = nl2br( htmlentities( $this->error_message ) );
         return $errormsg;
     }    
     //-------Private Helper functions-----------
@@ -344,38 +359,45 @@ class SiteUtil
     
     function GetLoginSessionVar()
     {
-        $retvar = md5($this->rand_key);
-        $retvar = 'usr_'.substr($retvar,0,10);
+        $retvar = md5( $this->rand_key );
+        $retvar = 'usr_'.substr( $retvar,0,10 );
         return $retvar;
     }
-    
+
+/*
+*	@START:Innovella
+*/
     function CheckLoginInDB($username,$password)
     {
-        if(!$this->DBLogin())
-        {
-            $this->HandleError("Database login failed!");
-            return false;
-        }          
-        $username = $this->SanitizeForSQL($username);
-        $pwdmd5 = md5($password);
-        $qry = "Select name, email from $this->tablename where username='$username' and password='$pwdmd5' and confirmcode='y'";
-        
-        $result = mysql_query($qry,$this->connection);
-        
-        if(!$result || mysql_num_rows($result) <= 0)
+		$username = $this->SanitizeForSQL( $username );
+        $pwdmd5 = md5( $password );
+
+		$user = new User();
+		$user->User_tp = "User";
+		$user->User_nm = $username;	// Username
+		$user->User_cd = $pwdmd5;	// Encrypted password
+		$user->Hashed_cd = "Y";	// User has confirmed their registration
+		$user->Key_cd = "AL";
+		$userrows = User::select( $user );
+
+        if( $user->RowCount <= 0 )
         {
             $this->HandleError("Error logging in. The username or password does not match");
             return false;
         }
         
-        $row = mysql_fetch_assoc($result);
-        
-        
-        $_SESSION['name_of_user']  = $row['name'];
-        $_SESSION['email_of_user'] = $row['email'];
-        
+		$_SESSION["User"] = $user;
+		$_SESSION["UserRows"] = $userrows;
+		$_SESSION["User_id"] = $userrows[0]->User_id;
+		$_SESSION["User_tp"] = $userrows[0]->User_tp;
+        $_SESSION["Person_nm"]  = $userrows[0]->Person_nm;
+        $_SESSION["Email_nm"] = $userrows[0]->Email_nm;
+
         return true;
     }
+/*
+*	@FINISH:Innovella
+*/
     
     function UpdateDBRecForConfirmation(&$user_rec)
     {
@@ -584,36 +606,13 @@ class SiteUtil
         if(!empty($_POST[$this->GetSpamTrapInputName()]) )
         {
             //The proper error is not given intentionally
-            $this->HandleError("Automated submission prevention: case 2 failed");
+            $this->HandleError( "Automated submission prevention: case 2 failed" );
             return false;
         }
-/*       
-<!-- @START:Innovella -->
-        $validator = new FormValidator();
-        $validator->addValidation("name","req","Please fill in Name");
-        $validator->addValidation("email","email","The input for Email should be a valid email value");
-        $validator->addValidation("email","req","Please fill in Email");
-        $validator->addValidation("username","req","Please fill in UserName");
-        $validator->addValidation("password","req","Please fill in Password");
-
-        
-        if(!$validator->ValidateForm())
-        {
-            $error='';
-            $error_hash = $validator->GetErrors();
-            foreach($error_hash as $inpname => $inp_err)
-            {
-                $error .= $inpname.':'.$inp_err."\n";
-            }
-            $this->HandleError($error);
-            return false;
-        }
-<!-- @FINISH:Innovella -->
-*/
         return true;
     }
     
-    function CollectRegistrationSubmission(&$formvars)
+    function CollectRegistrationSubmission( &$formvars )
     {
         $formvars['Person_nm'] = $this->Sanitize($_POST['Person_nm']);
         $formvars['Email_nm'] = $this->Sanitize($_POST['Email_nm']);
@@ -625,7 +624,7 @@ class SiteUtil
         $formvars['Class_tp'] = $this->Sanitize($_POST['Class_tp']);
     }
     
-    function SendUserConfirmationEmail(&$formvars)
+    function SendUserConfirmationEmail( &$formvars )
     {
         $mailer = new PHPMailer();
         
@@ -652,9 +651,10 @@ class SiteUtil
 
         if(!$mailer->Send())
         {
-            $this->HandleError("Failed sending registration confirmation email.");
+            $this->HandleError("Failed sending registration confirmation email. " . $mailer->ErrorInfo);
             return false;
         }
+
         return true;
     }
     function GetAbsoluteURLFolder()
@@ -701,17 +701,8 @@ class SiteUtil
         return true;
     }
     
-    function SaveToDatabase(&$formvars)
+    function SaveToDatabase( &$formvars )
     {
-        if(!$this->DBLogin())
-        {
-            $this->HandleError("Database login failed!");
-            return false;
-        }
-        if(!$this->Ensuretable())
-        {
-            return false;
-        }
 /*
         if(!$this->IsFieldUnique($formvars,'email'))
         {
@@ -733,9 +724,24 @@ class SiteUtil
         return true;
     }
     
-    function IsFieldUnique($formvars,$fieldname)
+    function IsFieldUnique( $formvars, $fieldname )
     {
-        $field_val = $this->SanitizeForSQL($formvars[$fieldname]);
+        $field_val = $this->SanitizeForSQL( $formvars[$fieldname] );
+
+		$user = new User();
+		$user->User_tp = "User";
+		$user->User_nm = $username;	// Username
+		$user->User_cd = $pwdmd5;	// Encrypted password
+		$user->Hashed_cd = "Y";	// User has confirmed their registration
+		$user->Key_cd = "AL";
+		User::select( $user );
+
+        if( $user->RowCount <= 0 )
+        {
+            $this->HandleError("Error logging in. The username or password does not match");
+            return false;
+        }
+
         $qry = "select username from $this->tablename where $fieldname='".$field_val."'";
         $result = mysql_query($qry,$this->connection);   
         if($result && mysql_num_rows($result) > 0)
@@ -836,14 +842,8 @@ class SiteUtil
     }
     function SanitizeForSQL($str)
     {
-        if( function_exists( "mysql_real_escape_string" ) )
-        {
-              $ret_str = mysql_real_escape_string( $str );
-        }
-        else
-        {
-              $ret_str = addslashes( $str );
-        }
+		$ret_str = addslashes( $str );
+
         return $ret_str;
     }
     

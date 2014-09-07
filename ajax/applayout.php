@@ -83,7 +83,7 @@ the <section></section> and you can use wells or panels instead
 										</code></td>
 										<td>Logout message popup, use it with <code>
 											data-logout-msg = "..."</code></td>
-										<td><a href="login.html" class="btn btn-default btn-xs" data-action="userLogout" data-logout-msg="Your message here..."> action </a></td>
+										<td><a href="logout.php" class="btn btn-default btn-xs" data-action="userLogout" data-logout-msg="Your message here..."> action </a></td>
 									</tr>
 									<tr>
 										<td>

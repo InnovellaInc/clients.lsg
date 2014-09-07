@@ -10,48 +10,18 @@ require_once("inc/config.ui.php");
 
 YOU CAN SET CONFIGURATION VARIABLES HERE BEFORE IT GOES TO NAV, RIBBON, ETC.
 E.G. $page_title = "Custom Title" */
-
 $page_title = "Login";
-// @LSG:START
-session_start();
-$message = array();
 
-if ( isset( $_POST["action"] ) and $_POST["action"] == "login" )
+require_once("inc/config.SiteUtil.php");
+
+if(isset($_POST['submitted']))
 {
-
-	$user = new User();
-	$user->User_tp = "User";
-	$user->User_nm = isset( $_POST["username"] ) ? preg_replace( "/[^ \-\_a-zA-Z0-9]/", "", $_POST["username"] ) : "";
-	$user->User_cd = isset( $_POST["password"] ) ? preg_replace( "/[^ \-\_a-zA-Z0-9]/", "", $_POST["password"] ) : "";
-	$user->Key_cd = "AL";
-	User::select( $user );
-	
-	if ( $user->RowCount = 1 )
-	{
-		$_SESSION["User"] = $user;
-		$_SESSION["User_id"] = $user->User_id;
-		$_SESSION["User_tp"] = $user->User_tp;
-		header ('location: ' . APP_URL);
-		exit;
-	}
-	else
-	{
-		$user = NULL;
-		$message = "Invalid username or password.";
-		echo ucwords( $message[0] ) . '<br/><br/>';
-	//if( isset( $_SESSION["user"] ) )
-	//	unset ($_SESSION["user"]);
-	}
-
+   if($siteutil->Login())
+   {
+        $siteutil->RedirectToURL("index.php");
+   }
 }
-else
-{
-	if( isset( $_SESSION["user"] ) )
-		unset ($_SESSION["user"]);
-	checkLogin();
 
-}
-// @LSG:FINISH
 /* ---------------- END PHP Custom Scripts ------------- */
 
 //include header
@@ -69,35 +39,40 @@ include("inc/header.php");
 	<!--<span id="logo"></span>-->
 
 	<div id="logo-group">
-		<span id="logo"> <img src="<?php echo ASSETS_URL; ?>/img/logo.png" alt="SmartAdmin"> </span>
+		<span id="logo"> <img src="<?php echo ASSETS_URL; ?>/img/logo.png" alt="Landscape Galleria"> </span>
 
 		<!-- END AJAX-DROPDOWN -->
 	</div>
 
-	<span id="extr-page-header-space"> <span class="hidden-mobile">Need an account?</span> <a href="<?php echo APP_URL; ?>/register.php" class="btn btn-danger">Create account</a> </span>
+	<span id="extr-page-header-space"> <span class="hidden-mobile">Need an account?</span> <a href="<?php echo APP_URL; ?>/register.php" class="btn btn-danger">Creat account</a> </span>
+
 </header>
-		
+
 <div id="main" role="main">
+
 	<!-- MAIN CONTENT -->
 	<div id="content" class="container">
-	<!-- ROW -->
+
 		<div class="row">
 			<div class="col-xs-12 col-sm-12 col-md-7 col-lg-8 hidden-xs hidden-sm">
-				<h1 class="txt-color-red login-header-big">SmartAdmin</h1>
+				<h1 class="txt-color-red login-header-big">Landscape Galleria</h1>
 				<div class="hero">
+
 					<div class="pull-left login-desc-box-l">
-						<h4 class="paragraph-header">It's Okay to be Smart. Experience the simplicity of SmartAdmin, everywhere you go!</h4>
+						<h4 class="paragraph-header">It's Okay to be Smart. Experience the simplicity of Landscape Galleria, everywhere you go!</h4>
 						<div class="login-app-icons">
 							<a href="javascript:void(0);" class="btn btn-danger btn-sm">Frontend Template</a>
 							<a href="javascript:void(0);" class="btn btn-danger btn-sm">Find out more</a>
 						</div>
 					</div>
+					
 					<img src="<?php echo ASSETS_URL; ?>/img/demo/iphoneview.png" class="pull-right display-image" alt="" style="width:210px">
+
 				</div>
 
 				<div class="row">
 					<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
-						<h5 class="about-heading">About SmartAdmin - Are you up to date?</h5>
+						<h5 class="about-heading">About Landscape Galleria - Are you up to date?</h5>
 						<p>
 							Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa.
 						</p>
@@ -112,29 +87,37 @@ include("inc/header.php");
 
 			</div>
 			<div class="col-xs-12 col-sm-12 col-md-5 col-lg-4">
-				<div class="well no-padding">
-					<!--<form action="<?php echo APP_URL; ?>" id="login-form" class="smart-form client-form">-->
-					<form action="<?php echo APP_URL . htmlspecialchars( $_SERVER['PHP_SELF'] ); ?>" method="post" id="login-form" class="smart-form client-form">
-						<input type="hidden" name="action" value="login" />
+				<div id="siteutil" class="well no-padding">
+					<form id="login-form" class="smart-form client-form" action="<?php echo $siteutil->GetSelfScript(); ?>" method="post" accept-charset="UTF-8">
 						<header>
 							Sign In
 						</header>
+
 						<fieldset>
+<!-- @START:Innovella -->
+<input type='hidden' name='submitted' id='submitted' value='1'/>
+<div id="login-error" class="alert" data-dismiss="alert"><?php echo $siteutil->GetErrorMessage(); ?>
+</div>
+<!-- @FINISH:Innovella -->
 							<section>
-								<label class="label">Username</label>
+								<label class="label">UserName</label>
 								<label class="input"> <i class="icon-append fa fa-user"></i>
-									<input type="text" name="username">
-									<b class="tooltip tooltip-top-right"><i class="fa fa-user txt-color-teal"></i> Please enter your username</b></label>
+									<input type="text" name="User_nm" id="User_nm" value="<?php echo $siteutil->SafeDisplay('User_nm') ?>" maxlength="50">
+									<b class="tooltip tooltip-top-right"><i class="fa fa-user txt-color-teal"></i> Please enter your UserName</b></label>
+<span id='login_username_errorloc' class='error'></span>
 							</section>
+
 							<section>
 								<label class="label">Password</label>
 								<label class="input"> <i class="icon-append fa fa-lock"></i>
-									<input type="password" name="password">
+									<input type="password" name="User_cd" id="User_cd" maxlength="50">
 									<b class="tooltip tooltip-top-right"><i class="fa fa-lock txt-color-teal"></i> Enter your password</b> </label>
+<span id='login_password_errorloc' class='error'></span>
 								<div class="note">
 									<a href="<?php echo APP_URL; ?>/forgotpassword.php">Forgot password?</a>
 								</div>
 							</section>
+
 							<section>
 								<label class="checkbox">
 									<input type="checkbox" name="remember" checked="">
@@ -142,7 +125,7 @@ include("inc/header.php");
 							</section>
 						</fieldset>
 						<footer>
-							<button type="submit" class="btn btn-primary">
+							<button type="submit" name="Submit" value="Submit" class="btn btn-primary">
 								Sign in
 							</button>
 						</footer>
@@ -151,8 +134,8 @@ include("inc/header.php");
 				</div>
 				
 			</div>
-		</div> <!-- END ROW-->
-	</div>	<!-- END CONTENT -->
+		</div>
+	</div>
 
 </div>
 <!-- END MAIN PANEL -->
@@ -173,39 +156,30 @@ include("inc/header.php");
 		// Validation
 		$("#login-form").validate({
 			// Rules for form validation
-			rules : {
-				username : {
-					required : true
-				},
-				password : {
+			rules : 
+			{
+				User_nm : {
 					required : true,
 					minlength : 3,
-					maxlength : 20
+					maxlength : 50
+				},
+				User_cd : {
+					required : true,
+					minlength : 6,
+					maxlength : 50
 				}
 			},
 
 			// Messages for form validation
-			messages : {
-				username : {
-					required : 'Please enter your user name'
+			messages : 
+			{
+				User_nm : {
+					required : 'Please enter your username'
 				},
-				email : {
-					required : 'Please enter your email address',
-					email : 'Please enter a VALID email address'
-				},
-				password : {
+				User_cd : {
 					required : 'Please enter your password'
 				}
 			},
-
-			// Ajax form submition
-			//submitHandler : function(form) {
-			//	$(form).ajaxSubmit({
-			//		success : function() {
-			//			$("#login-form").addClass('submited');
-			//		}
-			//	});
-			//},
 
 			// Do not change code below
 			errorPlacement : function(error, element) {
@@ -213,6 +187,20 @@ include("inc/header.php");
 			}
 		});
 	});
+
+// <![CDATA[
+
+    var frmvalidator  = new Validator("login-form");
+    frmvalidator.EnableOnPageErrorDisplay();
+    frmvalidator.EnableMsgsTogether();
+
+    frmvalidator.addValidation("User_nm","req","Please provide your username");
+    
+    frmvalidator.addValidation("User_cd","req","Please provide the password");
+
+// ]]>
+
+
 </script>
 
 <?php 

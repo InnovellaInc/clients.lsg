@@ -6,7 +6,7 @@
 		<meta charset="utf-8">
 		<!--<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">-->
 
-		<title> <?php echo $page_title != "" ? $page_title." - " : ""; ?>SmartAdmin </title>
+		<title> <?php echo $page_title != "" ? $page_title." - " : ""; ?>LandscapeGalleria </title>
 		<meta name="description" content="">
 		<meta name="author" content="">
 
@@ -190,7 +190,7 @@
 									</li>
 									<li class="divider"></li>
 									<li>
-										<a href="login.php" class="padding-10 padding-top-5 padding-bottom-5" data-action="userLogout"><i class="fa fa-sign-out fa-lg"></i> <strong><u>L</u>ogout</strong></a>
+										<a href="logout.php" class="padding-10 padding-top-5 padding-bottom-5" data-action="userLogout"><i class="fa fa-sign-out fa-lg"></i> <strong><u>L</u>ogout</strong></a>
 									</li>
 								</ul>
 							</li>
@@ -198,7 +198,7 @@
 
 						<!-- logout button -->
 						<div id="logout" class="btn-header transparent pull-right">
-							<span> <a href="<?php echo APP_URL; ?>/login.php" title="Sign Out" data-action="userLogout" data-logout-msg="You can improve your security further after logging out by closing this opened browser"><i class="fa fa-sign-out"></i></a> </span>
+							<span> <a href="<?php echo APP_URL; ?>/logout.php" title="Sign Out" data-action="userLogout" data-logout-msg="You can improve your security further after logging out by closing this opened browser"><i class="fa fa-sign-out"></i></a> </span>
 						</div>
 						<!-- end logout button -->
 

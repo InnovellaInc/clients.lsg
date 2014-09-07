@@ -11,6 +11,7 @@ abstract class DataAccessObject
 		try
 		{
 			$conn = new PDO( DB_DSN, DB_USERNAME, DB_PASSWORD );
+// PDO::MYSQL_ATTR_INIT_COMMAND    => "SET NAMES UTF8"
 			$conn->setAttribute( PDO::ATTR_PERSISTENT, true );
 			$conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 			$conn->setAttribute( PDO::ATTR_EMULATE_PREPARES, false );

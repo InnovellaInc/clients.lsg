@@ -1,5 +1,9 @@
 <!-- @START:Innovella -->
 <?PHP
+/*
+*	config.SiteUtil.php
+*
+*/
 require_once $document_root . "/lib/class.SiteUtil.php";
 
 $siteutil = new SiteUtil();

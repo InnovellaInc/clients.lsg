@@ -50,6 +50,12 @@ class User
 	public function setHashed_cd ( $val )
 	{ $this->_Hashed_cd = $val; }
 
+	private $_Person_nm = "";
+	public function getPerson_nm ()
+	{ return htmlspecialchars( $this->_Person_nm ); }
+	public function setPerson_nm ( $val )
+	{ $this->_Person_nm = mysql_real_escape_string ( $val ); }
+
 	private $_Email_nm = "";
 	public function getEmail_nm ()
 	{ return htmlspecialchars( $this->_Email_nm ); }
@@ -92,7 +98,7 @@ class User
 	public function setRowCount ( $val )
 	{ $this->_RowCount = $val; }
 
-	private static $_Rows = NULL;
+	private static $_Rows = 0;
 	public function getRows ()
 	{ return $this->_Rows; }
 	public function setRows ( $val )
@@ -121,6 +127,7 @@ class User
 		$this->User_nm = "";
 		$this->User_cd = "";
 		$this->Hashed_cd = "";
+		$this->Person_nm = "";
 		$this->Email_nm = "";
 		$this->Challenge_cd = "";
 		$this->Response_cd = "";
@@ -128,7 +135,7 @@ class User
 		$this->Key_cd = "AL";
 		$this->Mode_cd = "C";
 		$this->RowCount = 0;
-		$this->Rows = NULL;
+		$this->Rows = 0;
 	}
 /**
 *	SELECT
@@ -145,6 +152,7 @@ CALL gfpUser
 ,	@User_nm	:= :User_nm
 ,	@User_cd	:= :User_cd
 ,	@Hashed_cd	:= :Hashed_cd
+,	@Person_nm	:= :Person_nm
 ,	@Email_nm	:= :Email_nm
 ,	@Challenge_cd	:= :Challenge_cd
 ,	@Response_cd	:= :Response_cd
@@ -175,6 +183,7 @@ CALL gfpUser
 			$st->bindValue( ":User_nm", $obj->User_nm, PDO::PARAM_STR );
 			$st->bindValue( ":User_cd", $obj->User_cd, PDO::PARAM_STR );
 			$st->bindValue( ":Hashed_cd", $obj->Hashed_cd, PDO::PARAM_STR );
+			$st->bindValue( ":Person_nm", $obj->Person_nm, PDO::PARAM_STR );
 			$st->bindValue( ":Email_nm", $obj->Email_nm, PDO::PARAM_STR );
 			$st->bindValue( ":Challenge_cd", $obj->Challenge_cd, PDO::PARAM_STR );
 			$st->bindValue( ":Response_cd", $obj->Response_cd, PDO::PARAM_STR );
@@ -186,8 +195,10 @@ CALL gfpUser
 			if ( $obj->RowCount <= 0 )
 			{
 				$st->closeCursor();
+				return ( $obj->RowCount );
 				exit();
 			}
+
 			$obj->Rows = $st->fetchALL( PDO::FETCH_OBJ );
 			$st->closeCursor();
 			DataAccessObject::disconnect( $conn );
@@ -217,6 +228,7 @@ CALL ispUser
 ,	@User_nm	:= :User_nm
 ,	@User_cd	:= :User_cd
 ,	@Hashed_cd	:= :Hashed_cd
+,	@Person_nm	:= :Person_nm
 ,	@Email_nm	:= :Email_nm
 ,	@Challenge_cd	:= :Challenge_cd
 ,	@Response_cd	:= :Response_cd
@@ -251,6 +263,7 @@ CALL ispUser
 			$st->bindParam( ":User_nm", $obj->User_nm, PDO::PARAM_STR );
 			$st->bindParam( ":User_cd", $obj->User_cd, PDO::PARAM_STR );
 			$st->bindParam( ":Hashed_cd", $obj->Hashed_cd, PDO::PARAM_STR );
+			$st->bindParam( ":Person_nm", $obj->Person_nm, PDO::PARAM_STR );
 			$st->bindParam( ":Email_nm", $obj->Email_nm, PDO::PARAM_STR );
 			$st->bindParam( ":Challenge_cd", $obj->Challenge_cd, PDO::PARAM_STR );
 			$st->bindParam( ":Response_cd", $obj->Response_cd, PDO::PARAM_STR );
@@ -292,6 +305,7 @@ CALL uspUser
 ,	@User_nm	:= :User_nm
 ,	@User_cd	:= :User_cd
 ,	@Hashed_cd	:= :Hashed_cd
+,	@Person_nm	:= :Person_nm
 ,	@Email_nm	:= :Email_nm
 ,	@Challenge_cd	:= :Challenge_cd
 ,	@Response_cd	:= :Response_cd
@@ -322,6 +336,7 @@ CALL uspUser
 			$st->bindParam( ":User_nm", $obj->User_nm, PDO::PARAM_STR );
 			$st->bindParam( ":User_cd", $obj->User_cd, PDO::PARAM_STR );
 			$st->bindParam( ":Hashed_cd", $obj->Hashed_cd, PDO::PARAM_STR );
+			$st->bindParam( ":Person_nm", $obj->Person_nm, PDO::PARAM_STR );
 			$st->bindParam( ":Email_nm", $obj->Email_nm, PDO::PARAM_STR );
 			$st->bindParam( ":Challenge_cd", $obj->Challenge_cd, PDO::PARAM_STR );
 			$st->bindParam( ":Response_cd", $obj->Response_cd, PDO::PARAM_STR );
@@ -342,6 +357,16 @@ CALL uspUser
 			die( __CLASS__ . " - Query failed " . $e->getmessage() );
 		}
 	}	// END update
+
+/**
+*	Is AK unique?
+*	gfpUser
+*/
+	public static function AKRowExists()
+	{
+
+	}
+
 }
 ?>
 

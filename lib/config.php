@@ -35,6 +35,13 @@ defined( "TBL_RESOURCE_LOCATION" ) ? null : define( "TBL_RESOURCE_LOCATION", "re
 
 define( "ROOT_PATH", dirname( __FILE__ ));
 
+//require_once ( "class.SiteUtil.php" );
+//$siteutil = new SiteUtil();
+//$siteutil->SetWebsiteName('innovella.com');
+//$siteutil->SetAdminEmail('info@innovella.com');
+//$siteutil->SetRandomKey('qSRcVS6DrTzrPvr');
+
+
 /**
  * I18n support
  */
