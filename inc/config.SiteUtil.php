@@ -9,10 +9,10 @@ require_once $document_root . "/lib/class.SiteUtil.php";
 $siteutil = new SiteUtil();
 
 //Provide your site name here
-$siteutil->SetWebsiteName('innovella.com');
+$siteutil->SetWebsiteName("LandscapeGalleria.com");
 
 //Provide the email address where you want to get notifications
-$siteutil->SetAdminEmail('info@innovella.com');
+$siteutil->SetAdminEmail("info@LandscapeGalleria.com");
 
 //Provide your database login details here:
 //hostname, user name, password, database name and table name

@@ -1,4 +1,15 @@
+//	@START:Innovella
+	if( !$siteutil->CheckLogin())
+	{
+		$siteutil->RedirectToURL( "login.php" );
+		exit;
+	}
+//	@FINISH:Innovella
 
+//	@START:Innovella
+//	@FINISH:Innovella
+<!-- @START:Innovella -->
+<!-- @FINISH:Innovella -->
 
 SmartAdmin ver. 1.4.1	2014-JUL-31
 2014-JUL-08

@@ -28,14 +28,6 @@
   height:18px;
 }
 
-#siteutil .error
-{
-   font-family: Verdana, Arial, sans-serif; 
-   font-size: 0.7em;
-   color: #900;
-   background-color : #ffff00;
-}
-
 #siteutil #register_password_errorloc
 {
     clear:both;
@@ -105,4 +97,57 @@ padding-bottom:10px;
    font-size: 1.5em;
    font-weight:bold;
    color:#333;
+}
+
+/*
+ * Error messages
+ */
+#siteutil .error
+{
+  margin-bottom: 20px;
+  margin-top: 0px;
+  padding: 5px 15px 5px 34px;
+  color: #675100;
+  background-color: #ffff00;
+  border-width: 0px;
+  border-left-width: 5px;
+  padding: 10px;
+  border-radius: 0px;
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+}
+#siteutil .error .close
+{
+  top: 0px;
+  right: -5px;
+  line-height: 20px;
+}
+#siteutil .error-heading
+{
+  font-weight: 600;
+}
+#siteutil .error-danger
+{
+  border-color: #953b39;
+  color: #ffffff;
+  background: #c26565;
+  text-shadow: none;
+}
+#siteutil .error-warning
+{
+  border-color: #dfb56c;
+  color: #826430;
+  background: #efe1b3;
+}
+#siteutil .error-success
+{
+  border-color: #8ac38b;
+  color: #356635;
+  background: #cde0c4;
+}
+#siteutil .error-info 
+{
+  border-color: #9cb4c5;
+  color: #305d8c;
+  background: #d6dde7;
 }

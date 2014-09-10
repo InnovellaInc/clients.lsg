@@ -13,15 +13,17 @@ E.G. $page_title = "Custom Title" */
 
 $page_title = "Register";
 
+//	@START:Innovella
 require_once( "inc/config.SiteUtil.php" );
 
-if(isset($_POST['submitted']))
+if( isset( $_POST["submitted"] ) )
 {
-   if($siteutil->RegisterUser())
+   if( $siteutil->RegisterUser() )
    {
-        $siteutil->RedirectToURL("thank-you.html");
+        $siteutil->RedirectToURL( "thank-you.html" );
    }
 }
+//	@FINISH:Innovella
 
 /* ---------------- END PHP Custom Scripts ------------- */
 
@@ -80,8 +82,8 @@ include("inc/header.php");
 						</div>
 
 					</div>
-					<div id="siteutil" class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
-						<div class="well no-padding">
+					<div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
+						<div id="siteutil" class="well no-padding">
 
 							<form id="register" action="<?php echo $siteutil->GetSelfScript(); ?>"  class="smart-form client-form" method="post" accept-charset="UTF-8">
 								<header>
@@ -90,26 +92,27 @@ include("inc/header.php");
 
 								<fieldset>
 <!-- @START:Innovella -->
-<input type='hidden' name='submitted' id='submitted' value='1'/>
-<input type='text'  class='spmhidip' name='<?php echo $siteutil->GetSpamTrapInputName(); ?>' />
-<div id="resgister-error" class="alert" data-dismiss="alert"><?php echo $siteutil->GetErrorMessage(); ?>
+<input type="hidden" name="submitted" id="submitted" value="1"/>
+<input type="text"  class="spmhidip" name="<?php echo $siteutil->GetSpamTrapInputName(); ?>" />
+<div>
+ <span class="dropzone.dz-clickable .dz-message span"><?php echo $siteutil->GetErrorMessage(); ?></span>
 </div>
 <!-- @FINISH:Innovella -->
 									<section>
 										<label class="input"> <i class="icon-append fa fa-user"></i>
-											<input type="text" id="Person_nm" name="Person_nm" placeholder="Your first and last name" value="<?php echo $siteutil->SafeDisplay('Person_nm') ?>">
+											<input type="text" id="Person_nm" name="Person_nm" placeholder="Your first and last name" value="<?php echo $siteutil->SafeDisplay("Person_nm") ?>">
 											<b class="tooltip tooltip-bottom-right">Needed to enter the website</b> </label>
 									</section>
 
 									<section>
 										<label class="input"> <i class="icon-append fa fa-envelope"></i>
-											<input type="email" id="Email_nm" name="Email_nm" placeholder="Email address" value="<?php echo $siteutil->SafeDisplay('Email_nm') ?>">
+											<input type="email" id="Email_nm" name="Email_nm" placeholder="Email address" value="<?php echo $siteutil->SafeDisplay("Email_nm") ?>">
 											<b class="tooltip tooltip-bottom-right">Needed to verify your account</b> </label>
 									</section>
 
 									<section>
 										<label class="input"> <i class="icon-append fa fa-user"></i>
-											<input type="text" id="User_nm" name="User_nm" placeholder="Username" value="<?php echo $siteutil->SafeDisplay('User_nm') ?>">
+											<input type="text" id="User_nm" name="User_nm" placeholder="Username" value="<?php echo $siteutil->SafeDisplay("User_nm") ?>">
 											<b class="tooltip tooltip-bottom-right">Needed to enter the website</b> </label>
 									</section>
 
@@ -117,12 +120,12 @@ include("inc/header.php");
 										<label class="input"> <i class="icon-append fa fa-lock"></i>
 											<input type="password" id="User_cd" name="User_cd" placeholder="Password" id="User_cd">
 											<b class="tooltip tooltip-bottom-right">Don't forget your password</b> </label>
-<div class='pwdwidgetdiv' id='thepwddiv' ></div>
+<div class="pwdwidgetdiv" id="thepwddiv" ></div>
 									</section>
 
 									<section>
 										<label class="input"> <i class="icon-append fa fa-building"></i>
-											<input type="text" id="Company_nm" name="Company_nm" placeholder="Company Name" value="<?php echo $siteutil->SafeDisplay('Company_nm') ?>">
+											<input type="text" id="Company_nm" name="Company_nm" placeholder="Company Name" value="<?php echo $siteutil->SafeDisplay("Company_nm") ?>">
 											<b class="tooltip tooltip-bottom-right">Register the Company you work for here</b> </label>
 									</section>
 								</fieldset>
@@ -131,12 +134,12 @@ include("inc/header.php");
 									<div class="row">
 										<section class="col col-6">
 											<label class="input">
-												<input type="text" id="Position_nm" name="Position_nm" placeholder="Job Title" value="<?php echo $siteutil->SafeDisplay('Position_nm') ?>">
+												<input type="text" id="Position_nm" name="Position_nm" placeholder="Job Title" value="<?php echo $siteutil->SafeDisplay("Position_nm") ?>">
 											</label>
 										</section>
 										<section class="col col-6">
 											<label class="input">
-												<input type="text" id="Phone_cd" name="Phone_cd" placeholder="Phone number" value="<?php echo $siteutil->SafeDisplay('Phone_cd') ?>">
+												<input type="text" id="Phone_cd" name="Phone_cd" placeholder="Phone number" value="<?php echo $siteutil->SafeDisplay("Phone_cd") ?>">
 											</label>
 										</section>
 									</div>
@@ -145,7 +148,7 @@ include("inc/header.php");
 										<section class="col col-6">
 											<label class="select">
 												<select id="Class_tp" name="Class_tp">
-													<option value="" selected="" disabled="">Company Class</option>
+													<option value="" selected="">Company Class</option>
 													<option value="home owner">Home Owner</option>
 													<option value="home builder">Home Builder</option>
 													<option value="architect">Architect</option>
@@ -201,15 +204,12 @@ include("inc/header.php");
 										</section>
 										<section class="col col-6">
 											<label class="input">
-												<input type="text" id="license" name="license" placeholder="License number" value="<?php echo $siteutil->SafeDisplay('license') ?>">
+												<input type="text" id="Company_cd" name="Company_cd" placeholder="License number" value="<?php echo $siteutil->SafeDisplay("Company_cd") ?>">
 											</label>
 										</section>
 									</div>
 
 									<section>
-										<label class="checkbox">
-											<input type="checkbox" name="subscription" id="subscription">
-											<i></i>I want to receive news and special offers</label>
 										<label class="checkbox">
 											<input type="checkbox" name="terms" id="terms">
 											<i></i>I agree with the <a href="#" data-toggle="modal" data-target="#myModal"> Terms and Conditions </a></label>
@@ -456,9 +456,10 @@ Contractology supply a wide variety of commercial legal documents, such as <a hr
 
 <script type="text/javascript">
 	runAllForms();
-	
+
 	// Model i agree button
-	$("#i-agree").click(function(){
+	$("#i-agree").click(function()
+	{
 		$this=$("#terms");
 		if($this.checked) {
 			$('#myModal').modal('toggle');
@@ -469,41 +470,51 @@ Contractology supply a wide variety of commercial legal documents, such as <a hr
 	});
 	
 	// Validation
-	$(function() {
+	$(function()
+	{
 		// Validation
-		$("#register").validate({
-
+		$("#register").validate(
+		{
 			// Rules for form validation
 			rules :
 			{
-				Person_nm : {
+				Person_nm :
+				{
 					required : true
 				},
-				User_nm : {
+				User_nm :
+				{
 					required : true
 				},
-				Email_nm : {
+				Email_nm :
+				{
 					required : true,
 					email : true
 				},
-				User_cd : {
+				User_cd :
+				{
 					required : true,
 					minlength : 6,
 					maxlength : 20
 				},
-				Company_nm : {
+				Company_nm :
+				{
 					required : true
 				},
-				Position_nm : {
+				Position_nm :
+				{
 					required : true
 				},
-				Phone_cd : {
+				Phone_cd :
+				{
 					required : true
 				},
-				Class_tp : {
+				Class_tp :
+				{
 					required : true
 				},
-				terms : {
+				terms :
+				{
 					required : true
 				}
 			},
@@ -511,52 +522,73 @@ Contractology supply a wide variety of commercial legal documents, such as <a hr
 			// Messages for form validation
 			messages : 
 			{
-				Person_nm : {
+				Person_nm : 
+				{
 					required : 'Please enter your full name (first and last)'
 				},
-				User_nm : {
+				User_nm : 
+				{
 					required : 'Please enter a user name for account login'
 				},
-				Email_nm : {
+				Email_nm : 
+				{
 					required : 'Please enter your email address',
 					email : 'Please enter a VALID email address'
 				},
-				User_cd : {
+				User_cd : 
+				{
 					required : 'Please enter your password'
 				},
-				Company_nm : {
+				Company_nm : 
+				{
 					required : 'Please enter the name of your company'
 				},
-				Position_nm : {
+				Position_nm : 
+				{
 					required : 'Please enter your job title at this company'
 				},
-				Phone_cd : {
+				Phone_cd : 
+				{
 					required : 'Please enter a phone number we can reach you at'
 				},
-				Class_tp : {
+				Class_tp : 
+				{
 					required : 'Please select your company classification'
 				},
-				terms : {
+				terms : 
+				{
 					required : 'You must agree with Terms and Conditions'
 				}
 			},
 
 			// Ajax form submition
-			submitHandler : function(form) {
-				$(form).ajaxSubmit({
-					success : function() {
+			submitHandler : function(form) 
+			{
+				$(form).ajaxSubmit(
+				{
+					success : function() 
+					{
 						$("#smart-form-register").addClass('submited');
 					}
 				});
 			},
 
 			// Do not change code below
-			errorPlacement : function(error, element) {
+			errorPlacement : function(error, element)
+			{
 				error.insertAfter(element.parent());
 			}
 		});
 
 	});
+
+	var pwdwidget = new PasswordWidget('thepwddiv','password');
+    pwdwidget.MakePWDWidget();
+
+    var frmvalidator  = new Validator("register");
+    frmvalidator.EnableOnPageErrorDisplaySingleBox();
+    frmvalidator.EnableMsgsTogether();
+
 </script>
 
 <?php 

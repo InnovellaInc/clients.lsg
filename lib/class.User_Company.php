@@ -3,8 +3,6 @@
 require_once __DIR__ . "\class.Accessor.php";
 require_once __DIR__ . "\class.DataAccessObject.php";
 
-require __DIR__ . "\class.PDODebugger.php";
-
 /** 
  * The User_Company class. The Company class maps the database Company object to the application Company object.  
  USE:
@@ -301,14 +299,10 @@ CALL ispUser_Company
 ;
 		try
 		{
-// $pdo = new PDODebugger(DB_DSN, DB_USERNAME, DB_PASSWORD);
-// $st = $pdo->prepare( $sqlSet );
 			$st = $conn->prepare( $sqlSet );
             $st->bindParam( ":User_id", $obj->User_id, PDO::PARAM_INT | PDO::PARAM_NULL, 16 );
             $st->bindParam( ":Company_id", $obj->Company_id, PDO::PARAM_INT, 16 );
             $st->execute();
- // echo $st->getSQL() . PHP_EOL;
-// $st = $pdo->prepare( $sql );
 
 			$st = $conn->prepare( $sql );
 			$st->bindParam( ":User_tp", $obj->User_tp, PDO::PARAM_STR );
@@ -328,20 +322,18 @@ CALL ispUser_Company
 			$st->bindParam( ":Mode_cd", $obj->Mode_cd, PDO::PARAM_STR );
 			$st->execute();
 
-// echo $st->getSQL() . PHP_EOL;
-
-			$RowCount = $st->rowCount();
-			if ( $RowCount <= 0 )
+			$obj->RowCount = $st->rowCount();
+			if ( $obj->RowCount <= 0 )
 			{
 				$st->closeCursor();
 				return ( $obj->RowCount );
 				exit();
 			}
 
-			$objSet = $st->fetchALL( PDO::FETCH_OBJ );
+			$obj->Rows = $st->fetchALL( PDO::FETCH_OBJ );
 			$st->closeCursor();
 			DataAccessObject::disconnect( $conn );
-			return $objSet;
+			return ( $obj->Rows );
 		}
 		catch( PDOException $e )
 		{
@@ -423,6 +415,23 @@ CALL uspUser_Company
 			die( __CLASS__ . " - Query failed " . $e->getmessage() );
 		}
 	}	// END update
+
+/**
+*	Check if row exists based on key code and property settings
+*	gfpUser_Company
+*/
+	public function KeyRowExists()
+	{
+		self::select( $this );
+
+        if( $this->RowCount > 0 )
+        {
+            return true;
+        }
+
+		return false;
+	}
+
 }
 ?>
 

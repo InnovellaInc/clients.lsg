@@ -20,6 +20,8 @@ http://www.html-form-guide.com/php-form/php-login-form.html
 */
 require_once __DIR__ . "/PHPMailerAutoload.php";
 require_once __DIR__ . "/class.formvalidator.php";
+require_once __DIR__ . "/class.User.php";
+require_once __DIR__ . "/class.User_Company.php";
 
 class SiteUtil
 {
@@ -70,7 +72,7 @@ class SiteUtil
     //-------Main Operations ----------------------
     function RegisterUser()
     {
-        if( !isset( $_POST['submitted'] ) )
+        if( !isset( $_POST["submitted"] ) )
         {
            return false;
         }
@@ -89,11 +91,11 @@ class SiteUtil
             return false;
         }
 
-        if(!$this->SendUserConfirmationEmail($formvars))
+        if( !$this->SendUserConfirmationEmail( $formvars ) )
         {
             return false;
         }
-        
+
 /*
         $this->SendAdminIntimationEmail($formvars);
 */        
@@ -169,6 +171,11 @@ class SiteUtil
 	function UserRows()
 	{
 		return isset( $_SESSION["UserRows"] ) ? $_SESSION["UserRows"]:'';
+	}
+
+	function UserCompanyRows()
+	{
+		return isset( $_SESSION["UserCompanyRows"] ) ? $_SESSION["UserCompanyRows"]:'';
 	}
 
     function UserFullName()
@@ -305,9 +312,9 @@ class SiteUtil
     
     function SafeDisplay( $value_name )
     {
-        if(empty($_POST[$value_name]))
+        if( empty( $_POST[$value_name] ) )
         {
-            return'';
+            return "";
         }
         return htmlentities( $_POST[$value_name] );
     }
@@ -614,33 +621,34 @@ class SiteUtil
     
     function CollectRegistrationSubmission( &$formvars )
     {
-        $formvars['Person_nm'] = $this->Sanitize($_POST['Person_nm']);
-        $formvars['Email_nm'] = $this->Sanitize($_POST['Email_nm']);
-        $formvars['User_nm'] = $this->Sanitize($_POST['User_nm']);
-        $formvars['User_cd'] = $this->Sanitize($_POST['User_cd']);
-        $formvars['Company_nm'] = $this->Sanitize($_POST['Company_nm']);
-        $formvars['Position_nm'] = $this->Sanitize($_POST['Position_nm']);
-        $formvars['Phone_cd'] = $this->Sanitize($_POST['Phone_cd']);
-        $formvars['Class_tp'] = $this->Sanitize($_POST['Class_tp']);
+        $formvars["Person_nm"] = $this->Sanitize( $_POST["Person_nm"] );	// full name
+        $formvars["Email_nm"] = $this->Sanitize( $_POST["Email_nm"] );	// email
+        $formvars["User_nm"] = $this->Sanitize( $_POST["User_nm"] );	// username
+        $formvars["User_cd"] = $this->Sanitize( $_POST["User_cd"] );	// password
+        $formvars["Company_nm"] = $this->Sanitize( $_POST["Company_nm"] );	// company name
+        $formvars["Position_nm"] = $this->Sanitize( $_POST["Position_nm"] );	// title
+        $formvars["Phone_cd"] = $this->Sanitize( $_POST["Phone_cd"] );	// phone
+        $formvars["Class_tp"] = $this->Sanitize( $_POST["Class_tp"] );	// classification
+        $formvars["Company_cd"] = $this->Sanitize( $_POST["Company_cd"] );	// license
     }
     
     function SendUserConfirmationEmail( &$formvars )
     {
         $mailer = new PHPMailer();
         
-        $mailer->CharSet = 'utf-8';
+        $mailer->CharSet = "utf-8";
         
-        $mailer->AddAddress($formvars['Email_nm'],$formvars['Person_nm']);
+        $mailer->AddAddress( $formvars["Email_nm"],$formvars["Person_nm"] );
         
         $mailer->Subject = "Your registration with ".$this->sitename;
 
         $mailer->From = $this->GetFromAddress();
         
-        $confirmcode = $formvars['confirmcode'];
+        $confirmcode = $formvars["Hashed_cd"];
         
-        $confirm_url = $this->GetAbsoluteURLFolder().'/confirmreg.php?code='.$confirmcode;
+        $confirm_url = $this->GetAbsoluteURLFolder()."/confirmreg.php?code=".$confirmcode;
         
-        $mailer->Body ="Hello ".$formvars['Person_nm']."\r\n\r\n".
+        $mailer->Body ="Hello ".$formvars["Person_nm"]."\r\n\r\n".
         "Thank you for registrating with the ".$this->sitename."\r\n".
         "Please click the link below to confirm your registration.\r\n".
         "$confirm_url\r\n".
@@ -649,7 +657,7 @@ class SiteUtil
         "Webmaster\r\n".
         $this->sitename;
 
-        if(!$mailer->Send())
+        if( !$mailer->Send() )
         {
             $this->HandleError("Failed sending registration confirmation email. " . $mailer->ErrorInfo);
             return false;
@@ -657,15 +665,16 @@ class SiteUtil
 
         return true;
     }
+
     function GetAbsoluteURLFolder()
     {
-        $scriptFolder = (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on')) ? 'https://' : 'http://';
+        $scriptFolder = ( isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on') ) ? 'https://' : 'http://';
 
         $urldir ='';
-        $pos = strrpos($_SERVER['REQUEST_URI'],'/');
-        if(false !==$pos)
+        $pos = strrpos( $_SERVER['REQUEST_URI'],'/' );
+        if( false !== $pos )
         {
-            $urldir = substr($_SERVER['REQUEST_URI'],0,$pos);
+            $urldir = substr( $_SERVER['REQUEST_URI'],0,$pos );
         }
 
         $scriptFolder .= $_SERVER['HTTP_HOST'].$urldir;
@@ -703,143 +712,66 @@ class SiteUtil
     
     function SaveToDatabase( &$formvars )
     {
-/*
-        if(!$this->IsFieldUnique($formvars,'email'))
-        {
-            $this->HandleError("This email is already registered");
-            return false;
-        }
-        
-        if(!$this->IsFieldUnique($formvars,'username'))
-        {
-            $this->HandleError("This UserName is already used. Please try another username");
-            return false;
-        }        
-*/
-        if(!$this->InsertIntoDB($formvars))
-        {
-            $this->HandleError("Inserting to Database failed!");
-            return false;
-        }
-        return true;
-    }
-    
-    function IsFieldUnique( $formvars, $fieldname )
-    {
-        $field_val = $this->SanitizeForSQL( $formvars[$fieldname] );
 
 		$user = new User();
 		$user->User_tp = "User";
-		$user->User_nm = $username;	// Username
-		$user->User_cd = $pwdmd5;	// Encrypted password
-		$user->Hashed_cd = "Y";	// User has confirmed their registration
-		$user->Key_cd = "AL";
-		User::select( $user );
-
-        if( $user->RowCount <= 0 )
+		$user->User_nm = $formvars["User_nm"];	// Username
+		$user->Key_cd = "AK";
+		if ($user->KeyRowExists())
         {
-            $this->HandleError("Error logging in. The username or password does not match");
+            $this->HandleError( "Error! This UserName is already registered. Please choose another UserName" );
             return false;
         }
 
-        $qry = "select username from $this->tablename where $fieldname='".$field_val."'";
-        $result = mysql_query($qry,$this->connection);   
-        if($result && mysql_num_rows($result) > 0)
+        if( !$this->InsertUserCompany( $formvars ) )
         {
+            $this->HandleError( "Error! Inserting to Database failed!" );
             return false;
         }
         return true;
     }
     
-    function DBLogin()
-    {
-
-        $this->connection = mysql_connect($this->db_host,$this->username,$this->pwd);
-
-        if(!$this->connection)
-        {   
-            $this->HandleDBError("Database Login failed! Please make sure that the DB login credentials provided are correct");
-            return false;
-        }
-        if(!mysql_select_db($this->database, $this->connection))
-        {
-            $this->HandleDBError('Failed to select database: '.$this->database.' Please make sure that the database name provided is correct');
-            return false;
-        }
-        if(!mysql_query("SET NAMES 'UTF8'",$this->connection))
-        {
-            $this->HandleDBError('Error setting utf8 encoding');
-            return false;
-        }
-        return true;
-    }    
-    
-    function Ensuretable()
-    {
-        $result = mysql_query("SHOW COLUMNS FROM $this->tablename");   
-        if(!$result || mysql_num_rows($result) <= 0)
-        {
-            return $this->CreateTable();
-        }
-        return true;
-    }
-    
-    function CreateTable()
-    {
-        $qry = "Create Table $this->tablename (".
-                "id_user INT NOT NULL AUTO_INCREMENT ,".
-                "name VARCHAR( 128 ) NOT NULL ,".
-                "email VARCHAR( 64 ) NOT NULL ,".
-                "phone_number VARCHAR( 16 ) NOT NULL ,".
-                "username VARCHAR( 16 ) NOT NULL ,".
-                "password VARCHAR( 32 ) NOT NULL ,".
-                "confirmcode VARCHAR(32) ,".
-                "PRIMARY KEY ( id_user )".
-                ")";
-                
-        if(!mysql_query($qry,$this->connection))
-        {
-            $this->HandleDBError("Error creating the table \nquery was\n $qry");
-            return false;
-        }
-        return true;
-    }
-    
-    function InsertIntoDB(&$formvars)
+    function InsertUserCompany( &$formvars )
     {
     
-        $confirmcode = $this->MakeConfirmationMd5($formvars['Email_nm']);
+        $confirmcode = $this->MakeConfirmationMd5( $formvars["Email_nm"] );
         
-        $formvars['confirmcode'] = $confirmcode;
+        $formvars["Hashed_cd"] = $confirmcode;
         
-        $insert_query = 'insert into '.$this->tablename.'(
-                name,
-                email,
-                username,
-                password,
-                confirmcode
-                )
-                values
-                (
-                "' . $this->SanitizeForSQL($formvars['Person_nm']) . '",
-                "' . $this->SanitizeForSQL($formvars['Email_nm']) . '",
-                "' . $this->SanitizeForSQL($formvars['User_nm']) . '",
-                "' . md5($formvars['User_cd']) . '",
-                "' . $confirmcode . '"
-                )';      
-        if(!mysql_query( $insert_query ,$this->connection))
+		$usercompany = new User_Company();
+		$usercompany->User_tp = "User";
+		$usercompany->User_nm = $formvars["User_nm"];	// Username
+		$usercompany->User_cd = md5( $formvars["User_cd"] );	// Password
+		$usercompany->Alias_nm = $formvars["User_nm"];	// Username
+		$usercompany->Person_nm = $formvars["Person_nm"];	// Full name
+		$usercompany->Email_nm = $formvars["Email_nm"];	// email address
+		$usercompany->Hashed_cd = $confirmcode;	// Confirm code
+		$usercompany->User_tx = $formvars["Position_nm"];	// Confirm code
+		$usercompany->Company_tp = "Company";
+		$usercompany->Company_nm = $formvars["Company_nm"];
+		$usercompany->Company_cd = $formvars["Company_cd"];
+		$usercompany->Company_tx = $formvars["Class_tp"];
+		$usercompany->Mode_cd = "C";
+		$usercompanyRows = User_Company::insert( $usercompany );
+
+        if( $usercompany->RowCount <= 0 )
         {
-            $this->HandleDBError("Error inserting data to the table\nquery:$insert_query");
+            $this->HandleError("Error! Failed to register you in the database.");
             return false;
-        }        
+        }
+
+		$_SESSION["UserCompanyRows"] = $usercompanyRows;
+
         return true;
     }
+
     function MakeConfirmationMd5($email)
     {
         $randno1 = rand();
         $randno2 = rand();
-        return md5($email.$this->rand_key.$randno1.''.$randno2);
+        return md5($email.$this->rand_key.$randno1."".$randno2);
     }
+
     function SanitizeForSQL($str)
     {
 		$ret_str = addslashes( $str );
@@ -852,9 +784,9 @@ class SiteUtil
     data submitted. Prevents email injections or any other hacker attempts.
     if $remove_nl is true, newline chracters are removed from the input.
     */
-    function Sanitize($str,$remove_nl=true)
+    function Sanitize( $str,$remove_nl=true )
     {
-        $str = $this->StripSlashes($str);
+        $str = $this->StripSlashes( $str );
 
         if($remove_nl)
         {
@@ -866,7 +798,7 @@ class SiteUtil
                 '/(%08+)/i',
                 '/(%09+)/i'
                 );
-            $str = preg_replace($injections,'',$str);
+            $str = preg_replace( $injections,'',$str );
         }
 
         return $str;

@@ -203,7 +203,7 @@ CALL gfpUser
 			$st->closeCursor();
 			DataAccessObject::disconnect( $conn );
 
-			return ($obj->Rows);
+			return ( $obj->Rows );
 		}
 		catch( PDOException $e)
 		{
@@ -359,12 +359,19 @@ CALL uspUser
 	}	// END update
 
 /**
-*	Is AK unique?
+*	Check if row exists based on key code and property settings
 *	gfpUser
 */
-	public static function AKRowExists()
+	public function KeyRowExists()
 	{
+		self::select( $this );
 
+        if( $this->RowCount > 0 )
+        {
+            return true;
+        }
+
+		return false;
 	}
 
 }

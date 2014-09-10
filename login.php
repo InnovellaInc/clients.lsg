@@ -12,15 +12,17 @@ YOU CAN SET CONFIGURATION VARIABLES HERE BEFORE IT GOES TO NAV, RIBBON, ETC.
 E.G. $page_title = "Custom Title" */
 $page_title = "Login";
 
-require_once("inc/config.SiteUtil.php");
+//	@START:Innovella
+require_once( "inc/config.SiteUtil.php" );
 
-if(isset($_POST['submitted']))
+if( isset( $_POST['submitted'] ) )
 {
-   if($siteutil->Login())
+   if( $siteutil->Login() )
    {
-        $siteutil->RedirectToURL("index.php");
+        $siteutil->RedirectToURL( "index.php" );
    }
 }
+//	@FINISH:Innovella
 
 /* ---------------- END PHP Custom Scripts ------------- */
 

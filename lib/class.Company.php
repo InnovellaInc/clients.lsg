@@ -273,6 +273,23 @@ CALL uspCompany
 			die( __CLASS__ . " - Query failed " . $e->getmessage() );
 		}
 	}	// END insert
+
+/**
+*	Check if row exists based on key code and property settings
+*	gfpCompany
+*/
+	public function KeyRowExists()
+	{
+		self::select( $this );
+
+        if( $this->RowCount > 0 )
+        {
+            return true;
+        }
+
+		return false;
+	}
+
 }
 // @LSG:FINISH
 ?>
