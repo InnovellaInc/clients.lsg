@@ -11,6 +11,14 @@
 <!-- @START:Innovella -->
 <!-- @FINISH:Innovella -->
 
+hello, we use a MySQL db and our db table schema uses large indexes. we need to set these two options on the MySQL server to enable large indexes
+SET GLOBAL 	innodb_large_prefix	= 'ON';
+SET GLOBAL 	innodb_file_format	= 'Barracuda';
+
+MySQL said: Documentation
+
+#1227 - Access denied; you need (at least one of) the SUPER privilege(s) for this operation 
+
 SmartAdmin ver. 1.4.1	2014-JUL-31
 2014-JUL-08
 Database Objects

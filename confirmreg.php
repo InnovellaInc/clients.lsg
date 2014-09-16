@@ -12,13 +12,13 @@ E.G. $page_title = "Custom Title" */
 
 $page_title = "Confirm Registration";
 
-require_once("inc/config.SiteUtil.php");
+require_once( "inc/config.SiteUtil.php" );
 
-if(isset($_GET['code']))
+if( isset( $_GET["code"] ) )
 {
-   if($siteutil->ConfirmUser())
+   if( $siteutil->ConfirmUser() )
    {
-        $siteutil->RedirectToURL("thank-you-reg.html");
+        $siteutil->RedirectToURL( "thank-you-reg.html" );
    }
 }
 /* ---------------- END PHP Custom Scripts ------------- */
@@ -46,41 +46,115 @@ include("inc/header.php");
 		<div id="main" role="main">
 			<!-- MAIN CONTENT -->
 			<div id="content" class="container">
-<h2>Confirm registration</h2>
-<p>
-Please enter the confirmation code in the box below
-</p>
+			<div class="row">
+				<div class="col-xs-12 col-sm-12 col-md-7 col-lg-7 hidden-xs hidden-sm">
+					<h1 class="txt-color-red login-header-big">Landscape Galleria</h1>
+					<div class="hero">
+						<div class="pull-left login-desc-box-l">
+							<h4 class="paragraph-header">It's Okay to be Smart. Experience the simplicity of the Landscape Galleria, everywhere you go!</h4>
+						</div>
+					</div>
+				</div>
 
 <!-- Form Code Start -->
-<div id='siteutil'>
-<form id='confirm' action='<?php echo $siteutil->GetSelfScript(); ?>' method='get' accept-charset='UTF-8'>
-<div class='short_explanation'>* required fields</div>
-<div><span class='error'><?php echo $siteutil->GetErrorMessage(); ?></span></div>
-<div class='container'>
-    <label for='code' >Confirmation Code:* </label><br/>
-    <input type='text' name='code' id='code' maxlength="50" /><br/>
-    <span id='register_code_errorloc' class='error'></span>
+				<div class="col-sm-12 col-sm-12 col-md-5 col-lg-5">
+					<div id="siteutil" class="well no-padding">
+						<form id="confirm" action="<?php echo $siteutil->GetSelfScript(); ?>" class="smart-form client-form" method="get" accept-charset="UTF-8">
+							<header>Registration Confirmation</header>
+							<div>
+<div class=".alert alert-danger alert-heading">
+<span><?php echo $siteutil->GetErrorMessage(); ?></span>
 </div>
-<div class='container'>
-    <input type='submit' name='Submit' value='Submit' />
-</div>
+<!--<strong>Error! </strong>-->
+							</div>	<!-- error message END -->
 
-</form>
+							<fieldset>
+								<section>
+									<label class="input"> <i class="icon-append fa fa-building"></i>
+										<input type="text" id="code" name="code" placeholder="Confirmation Code" value="<?php echo $siteutil->SafeDisplay("code") ?>">
+										<b class="tooltip tooltip-bottom-right">Copy and paste the confirmation code from the registration email here</b> </label>
+								</section>
+							</fieldset>
+							<footer>
+								<button type="submit" name="Submit" class="btn btn-primary" value="Submit">
+									Confirm
+								</button>
+							</footer>
+
+			<div class="message">
+				<i class="fa fa-check"></i>
+				<p>
+					Thank you for confirming your registration!
+				</p>
+			</div>
+
+						</form>	<!-- form END-->
+					</div><!-- siteutil END -->
+				</div>
+			</div>
+		</div><!-- content END -->
+
 <!-- client-side Form Validations:
 Uses the excellent form validation script from JavaScript-coder.com-->
-</div><!-- content -->
-</div><!-- main -->
-<script type='text/javascript'>
+<script type="text/javascript">
+	runAllForms();
+
+	// Validation
+	$(function()
+	{
+		// Validation
+		$("#confirm").validate(
+		{
+			// Rules for form validation
+			rules :
+			{
+				code :
+				{
+					required : true
+				}
+			},
+
+			// Messages for form validation
+			messages : 
+			{
+				code : 
+				{
+					required : 'Please enter the confirmation code from the registration email'
+				}
+			},
+
+			// Ajax form submition
+			submitHandler : function(form) 
+			{
+				$(form).ajaxSubmit(
+				{
+					success : function() 
+					{
+						$("#confirm").addClass('submited');
+					}
+				});
+			},
+
+			// Do not change code below
+			errorPlacement : function(error, element)
+			{
+				error.insertAfter(element.parent());
+			}
+		});
+
+	});
+
+
 // <![CDATA[
 
     var frmvalidator  = new Validator("confirm");
     frmvalidator.EnableOnPageErrorDisplay();
     frmvalidator.EnableMsgsTogether();
-    frmvalidator.addValidation("code","req","Please enter the confirmation code");
+//    frmvalidator.addValidation("code","req","Please enter the confirmation code");
 
 // ]]>
 </script>
-</div>
+</div><!-- main END -->
 <!--
 Form Code End (see html-form-guide.com for more info.)
 -->

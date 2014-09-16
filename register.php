@@ -89,15 +89,14 @@ include("inc/header.php");
 								<header>
 									Registration is FREE*
 								</header>
-
-								<fieldset>
 <!-- @START:Innovella -->
-<input type="hidden" name="submitted" id="submitted" value="1"/>
+<input type='hidden' name='submitted' id='submitted' value='1'/>
 <input type="text"  class="spmhidip" name="<?php echo $siteutil->GetSpamTrapInputName(); ?>" />
-<div>
- <span class="dropzone.dz-clickable .dz-message span"><?php echo $siteutil->GetErrorMessage(); ?></span>
+<div class=".alert alert-danger alert-heading">
+<span><?php echo $siteutil->GetErrorMessage(); ?></span>
 </div>
 <!-- @FINISH:Innovella -->
+								<fieldset>
 									<section>
 										<label class="input"> <i class="icon-append fa fa-user"></i>
 											<input type="text" id="Person_nm" name="Person_nm" placeholder="Your first and last name" value="<?php echo $siteutil->SafeDisplay("Person_nm") ?>">

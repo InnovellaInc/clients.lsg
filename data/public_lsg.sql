@@ -12,11 +12,12 @@ MySQL - 5.6.10-log : Database - public_lsg
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-CREATE DATABASE /*!32312 IF NOT EXISTS*/`public_lsg` /*!40100 DEFAULT CHARACTER SET utf8 */;
-
-USE `public_lsg`;
-
 /*Table structure for table `fgusers3` */
+SET GLOBAL 	innodb_large_prefix	= 'ON'
+;
+
+SET GLOBAL 	innodb_file_format	= 'Barracuda'
+;
 
 DROP TABLE IF EXISTS `fgusers3`;
 
@@ -29,11 +30,7 @@ CREATE TABLE `fgusers3` (
   `password` varchar(32) NOT NULL,
   `confirmcode` varchar(32) DEFAULT NULL,
   PRIMARY KEY (`id_user`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
-
-/*Data for the table `fgusers3` */
-
-insert  into `fgusers3`(`id_user`,`name`,`email`,`phone_number`,`username`,`password`,`confirmcode`) values (1,'max power','sshacter@innovella.com','','mpower','48503dfd58720bd5ff35c102065a52d7','y');
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
 
 /*Table structure for table `righttype` */
 
@@ -43,8 +40,6 @@ CREATE TABLE `righttype` (
   `Right_tp` varchar(64) NOT NULL,
   PRIMARY KEY (`Right_tp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf32 ROW_FORMAT=DYNAMIC;
-
-/*Data for the table `righttype` */
 
 /*Table structure for table `tblcompany` */
 
@@ -61,10 +56,6 @@ CREATE TABLE `tblcompany` (
   CONSTRAINT `fk2Company` FOREIGN KEY (`Company_tp`) REFERENCES `tblcompanytype` (`Company_tp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
-/*Data for the table `tblcompany` */
-
-insert  into `tblcompany`(`Company_id`,`Company_tp`,`Company_nm`,`Company_cd`) values (2,'Company','Vecchio Trees, LLC.','2|Company'),(8,'Company','Eye of The Day','LSG20140613-2'),(9,'Company','PHP Company-1','PHP Company-1'),(10,'Company','PHP Company-2','PHP Company-2'),(11,'Company','PHP Company-3','CODEs Company-3');
-
 /*Table structure for table `tblcompanytype` */
 
 DROP TABLE IF EXISTS `tblcompanytype`;
@@ -75,10 +66,6 @@ CREATE TABLE `tblcompanytype` (
   CONSTRAINT `fk1CompanyType` FOREIGN KEY (`Company_tp`) REFERENCES `tblresourcetype` (`Resrc_tp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*Data for the table `tblcompanytype` */
-
-insert  into `tblcompanytype`(`Company_tp`) values ('Company'),('CompanyClass');
-
 /*Table structure for table `tblcontacttype` */
 
 DROP TABLE IF EXISTS `tblcontacttype`;
@@ -88,10 +75,6 @@ CREATE TABLE `tblcontacttype` (
   PRIMARY KEY (`Contact_tp`),
   CONSTRAINT `fk1ContactType` FOREIGN KEY (`Contact_tp`) REFERENCES `tblresourcetype` (`Resrc_tp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
-
-/*Data for the table `tblcontacttype` */
-
-insert  into `tblcontacttype`(`Contact_tp`) values ('Contact'),('ContactAddress'),('ContactEmail');
 
 /*Table structure for table `tblresource` */
 
@@ -110,11 +93,7 @@ CREATE TABLE `tblresource` (
   PRIMARY KEY (`Resrc_id`,`Resrc_tp`),
   KEY `ix1Resource` (`Resrc_tp`),
   CONSTRAINT `fk1Resource` FOREIGN KEY (`Resrc_tp`) REFERENCES `tblresourcetype` (`Resrc_tp`)
-) ENGINE=InnoDB AUTO_INCREMENT=79 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
-
-/*Data for the table `tblresource` */
-
-insert  into `tblresource`(`Resrc_id`,`Resrc_tp`,`Resrc_tx`,`ADD_dm`,`ADD_nm`,`UPD_dm`,`UPD_nm`,`DEL_dm`,`DEL_nm`) values (0,'RESOURCE','Root resource row','2014-05-25 00:00:00','db_service',NULL,NULL,NULL,NULL),(2,'Company','Vecchio Trees, LLC.','2014-05-25 00:00:00','db_service',NULL,NULL,NULL,NULL),(8,'Company','isp test','2014-06-13 19:55:29','innovella@localhost',NULL,NULL,NULL,NULL),(9,'Company','','2014-06-19 23:48:47','innovella@localhost',NULL,NULL,NULL,NULL),(10,'Company','Upd test2','2014-07-17 09:48:50','innovella@localhost','2014-07-27 23:02:27','2014-07-27 23:02:27',NULL,NULL),(11,'Company','uspCompany called from class.Company','2014-06-22 17:15:51','innovella@localhost','2014-06-22 21:14:27','innovella@localhost',NULL,NULL),(12,'User','isp test','2014-06-25 04:16:03','innovella@localhost',NULL,NULL,NULL,NULL),(13,'User','isp test','2014-06-25 04:16:34','innovella@localhost',NULL,NULL,NULL,NULL),(14,'UserAdmin','isp test','2014-06-25 04:25:54','innovella@localhost',NULL,NULL,NULL,NULL),(15,'User',NULL,'2014-06-29 06:37:55','innovella@localhost',NULL,NULL,NULL,NULL),(16,'User',NULL,'2014-06-29 06:44:32','innovella@localhost',NULL,NULL,NULL,NULL),(17,'User',NULL,'2014-06-29 06:45:15','innovella@localhost',NULL,NULL,NULL,NULL),(18,'User',NULL,'2014-06-29 19:24:03','innovella@localhost',NULL,NULL,NULL,NULL),(19,'User',NULL,'2014-06-29 19:24:09','innovella@localhost',NULL,NULL,NULL,NULL),(20,'User','gmccauley','2014-06-29 19:31:31','innovella@localhost',NULL,NULL,NULL,NULL),(21,'User','gmccauley','2014-06-29 19:32:46','innovella@localhost',NULL,NULL,NULL,NULL),(22,'User','gmccauley','2014-06-29 19:33:16','innovella@localhost',NULL,NULL,NULL,NULL),(23,'User','gmccauley','2014-06-29 19:35:28','innovella@localhost',NULL,NULL,NULL,NULL),(24,'User','gmccauley','2014-06-29 19:35:29','innovella@localhost',NULL,NULL,NULL,NULL),(25,'User','gmccauley','2014-06-29 19:35:59','innovella@localhost',NULL,NULL,NULL,NULL),(26,'User','gmccauley','2014-06-29 19:36:04','innovella@localhost',NULL,NULL,NULL,NULL),(27,'User','gmccauley','2014-06-29 19:36:05','innovella@localhost',NULL,NULL,NULL,NULL),(28,'User','test user 1','2014-06-29 19:58:43','innovella@localhost',NULL,NULL,NULL,NULL),(29,'User','test user 1','2014-06-29 19:58:43','innovella@localhost',NULL,NULL,NULL,NULL),(30,'User','test user 1','2014-06-29 19:59:36','innovella@localhost',NULL,NULL,NULL,NULL),(31,'User','test user 1','2014-06-29 19:59:37','innovella@localhost',NULL,NULL,NULL,NULL),(32,'User','test user 1','2014-06-29 20:15:31','innovella@localhost',NULL,NULL,NULL,NULL),(33,'User','test user 1','2014-06-29 20:20:13','innovella@localhost',NULL,NULL,NULL,NULL),(34,'User','test user 1','2014-06-29 20:25:17','innovella@localhost',NULL,NULL,NULL,NULL),(35,'User','test user 1','2014-06-29 20:32:35','innovella@localhost',NULL,NULL,NULL,NULL),(36,'User',NULL,'2014-07-05 22:01:38','root@localhost',NULL,NULL,NULL,NULL),(37,'User','','2014-07-05 23:31:48','root@localhost',NULL,NULL,NULL,NULL),(38,'User','','2014-07-05 23:36:47','root@localhost',NULL,NULL,NULL,NULL),(39,'User','','2014-07-05 23:40:13','root@localhost',NULL,NULL,NULL,NULL),(40,'User','','2014-07-05 23:40:28','root@localhost',NULL,NULL,NULL,NULL),(41,'User','','2014-07-05 23:44:44','root@localhost',NULL,NULL,NULL,NULL),(42,'User','','2014-07-05 23:46:04','root@localhost',NULL,NULL,NULL,NULL),(43,'User','','2014-07-05 23:46:39','root@localhost',NULL,NULL,NULL,NULL),(44,'User','','2014-07-05 23:47:30','root@localhost',NULL,NULL,NULL,NULL),(45,'User','','2014-07-05 23:47:54','root@localhost',NULL,NULL,NULL,NULL),(46,'User','','2014-07-05 23:48:24','root@localhost',NULL,NULL,NULL,NULL),(47,'User','','2014-07-05 23:50:02','root@localhost',NULL,NULL,NULL,NULL),(48,'User','','2014-07-05 23:53:25','root@localhost',NULL,NULL,NULL,NULL),(49,'User','','2014-07-05 23:54:41','root@localhost',NULL,NULL,NULL,NULL),(50,'User','','2014-07-05 23:56:19','root@localhost',NULL,NULL,NULL,NULL),(51,'User','','2014-07-05 23:56:51','root@localhost',NULL,NULL,NULL,NULL),(52,'User','','2014-07-05 23:58:37','root@localhost',NULL,NULL,NULL,NULL),(53,'User','','2014-07-05 23:58:55','root@localhost',NULL,NULL,NULL,NULL),(54,'User',NULL,'2014-07-06 00:01:49','root@localhost',NULL,NULL,NULL,NULL),(55,'User','','2014-07-06 00:06:04','root@localhost',NULL,NULL,NULL,NULL),(56,'User','','2014-07-06 00:06:19','root@localhost',NULL,NULL,NULL,NULL),(57,'User',NULL,'2014-07-06 00:28:28','root@localhost','0000-00-00 00:00:00',NULL,'0000-00-00 00:00:00',NULL),(58,'User',NULL,'2014-07-06 04:12:01','root@localhost','0000-00-00 00:00:00',NULL,'0000-00-00 00:00:00',NULL),(59,'UserAdmin',NULL,'2014-07-06 04:28:36','root@localhost','0000-00-00 00:00:00',NULL,'0000-00-00 00:00:00',NULL),(63,'User','Update Test','2014-07-17 09:48:50','innovella@localhost','2014-07-17 10:34:38','innovella@localhost',NULL,NULL),(64,'User','Update Test','2014-07-17 09:39:18','root@localhost','2014-07-17 09:39:18','innovella@localhost',NULL,NULL),(65,'User','test user 1','2014-07-27 22:20:08','root@localhost','2014-07-28 03:31:43','root@localhost',NULL,NULL),(77,'ContactEmail',NULL,'2014-07-28 02:51:16','root@localhost','2014-07-28 03:30:56','root@localhost',NULL,NULL),(78,'ContactAddress',NULL,'2014-07-28 03:02:07','root@localhost','2014-07-28 03:31:43','root@localhost',NULL,NULL);
+) ENGINE=InnoDB AUTO_INCREMENT=87 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
 /*Table structure for table `tblresource_company` */
 
@@ -142,10 +121,6 @@ CREATE TABLE `tblresource_company` (
   CONSTRAINT `fk2Resource_Company` FOREIGN KEY (`Resrc_id`, `Resrc_tp`) REFERENCES `tblresource` (`Resrc_id`, `Resrc_tp`),
   CONSTRAINT `fk3Resource_Company` FOREIGN KEY (`Company_id`, `Company_tp`) REFERENCES `tblcompany` (`Company_id`, `Company_tp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
-
-/*Data for the table `tblresource_company` */
-
-insert  into `tblresource_company`(`Resrc_id`,`Resrc_tp`,`Company_id`,`Company_tp`,`Resrc_nm`,`Resrc_cd`,`Alias_nm`,`ADD_dm`,`ADD_nm`,`UPD_dm`,`UPD_nm`,`DEL_dm`,`DEL_nm`) values (34,'User',9,'Company','user1','password','test user1','2014-06-29 20:25:17','innovella@localhost',NULL,NULL,NULL,NULL),(35,'User',9,'Company','user2','password','test user1','2014-06-29 20:35:51','innovella@localhost',NULL,NULL,NULL,NULL),(35,'User',10,'Company','user2','password','test user2','2014-06-29 20:37:11','innovella@localhost',NULL,NULL,NULL,NULL),(63,'User',10,'Company','User3','new password','test user3','2014-07-13 21:27:07','root@localhost','2014-07-17 10:34:38','innovella@localhost',NULL,NULL),(64,'User',10,'Company','User5','new password','test user5','2014-07-14 06:24:07','root@localhost',NULL,NULL,NULL,NULL),(65,'User',10,'Company','mpower','mypass','test user1','2014-07-27 22:20:08','root@localhost','2014-07-27 23:02:27','root@localhost',NULL,NULL);
 
 /*Table structure for table `tblresource_contact` */
 
@@ -181,10 +156,6 @@ CREATE TABLE `tblresource_contact` (
   CONSTRAINT `fk4Resource_Contact` FOREIGN KEY (`Contact_id`, `Contact_tp`) REFERENCES `tblresource` (`Resrc_id`, `Resrc_tp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
-/*Data for the table `tblresource_contact` */
-
-insert  into `tblresource_contact`(`Resrc_id`,`Resrc_tp`,`Contact_id`,`Contact_tp`,`Contact_nm`,`Contact_cd`,`Alias_nm`,`Address_nm`,`City_cd`,`State_cd`,`Zip_cd`,`Phone_cd`,`GPS_cd`,`ADD_dm`,`ADD_nm`,`UPD_dm`,`UPD_nm`,`DEL_dm`,`DEL_nm`) values (65,'User',77,'ContactEmail','mpower@ymail.net',NULL,'Max Power Address',NULL,NULL,'CA','92626','1234567890',NULL,'2014-07-28 02:51:16','root@localhost','2014-07-28 03:30:56','root@localhost',NULL,NULL),(65,'User',78,'ContactAddress','mpower@ymail.net',NULL,'Max Power Address','400 Enclave Cir #203, Costa Mesa, CA 92626','400 Enclave Cir #203, Costa Mesa, CA 92626','CA','92626','1234567890',NULL,'2014-07-28 03:02:07','root@localhost','2014-07-28 03:31:43','root@localhost',NULL,NULL);
-
 /*Table structure for table `tblresourcetype` */
 
 DROP TABLE IF EXISTS `tblresourcetype`;
@@ -201,10 +172,6 @@ CREATE TABLE `tblresourcetype` (
   UNIQUE KEY `akResourceType` (`Resrc_tp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*Data for the table `tblresourcetype` */
-
-insert  into `tblresourcetype`(`Resrc_tp`,`ParentResrc_tp`,`ResrcType_tx`,`Left_id`,`Right_id`,`Level_id`,`Order_id`) values ('Asset','RESOURCE',NULL,NULL,NULL,NULL,NULL),('AssetBlueprint','Asset',NULL,NULL,NULL,NULL,NULL),('AssetChangeOrder','Asset',NULL,NULL,NULL,NULL,NULL),('AssetContract','Asset',NULL,NULL,NULL,NULL,NULL),('AssetDocument','Asset',NULL,NULL,NULL,NULL,NULL),('AssetImage','Asset',NULL,NULL,NULL,NULL,NULL),('Company','RESOURCE','Company domain type',NULL,NULL,NULL,NULL),('CompanyClass','Company',NULL,-1,-1,-1,-1),('Contact','RESOURCE','Contact Types',-1,-1,-1,-1),('ContactAddress','Contact','Contact Types',-1,-1,-1,-1),('ContactEmail','Contact','Contact Types',-1,-1,-1,-1),('Event','RESOURCE','Event domain type',NULL,NULL,NULL,NULL),('Group','RESOURCE','Group domain type',NULL,NULL,NULL,NULL),('JobRole','Role','A collection of employees or profiles with a given set of skills assigned to the Role (and transitively to the person).',NULL,NULL,NULL,NULL),('Location','RESOURCE',NULL,NULL,NULL,NULL,NULL),('LocationCompany','Location',NULL,NULL,NULL,NULL,NULL),('LocationProject','Location',NULL,NULL,NULL,NULL,NULL),('Project','RESOURCE',NULL,NULL,NULL,NULL,NULL),('ProjectClient','Project','Client project with associated resources',NULL,NULL,NULL,NULL),('RESOURCE',NULL,'Root resource type',NULL,NULL,NULL,NULL),('Right','Security','Set of security privileges and policies for security model',NULL,NULL,NULL,NULL),('Role','RESOURCE','Role domain type',NULL,NULL,NULL,NULL),('Security','RESOURCE','Security domain type',NULL,NULL,NULL,NULL),('SecurityRole','Role','A Security Role is a collection of users with a given set of permissions assigned to the Role (and transitively, to the users).',NULL,NULL,NULL,NULL),('System','RESOURCE','System domain type',NULL,NULL,NULL,NULL),('User','RESOURCE','User domain type',NULL,NULL,NULL,NULL),('UserAdmin','User','Admin account for authentication and authorization.',NULL,NULL,NULL,NULL),('UserClient','User',NULL,NULL,NULL,NULL,NULL),('UserContact','User',NULL,NULL,NULL,NULL,NULL),('UserServiceAccount','User','The managed service account is designed to provide crucial applications with the isolation of their own PICS accounts, while eliminating the need for an administrator to manually administer the service principal name (SPN) and credentials for these accounts.',NULL,NULL,NULL,NULL),('UserStaff','User',NULL,NULL,NULL,NULL,NULL);
-
 /*Table structure for table `tblresourcetype_companytype` */
 
 DROP TABLE IF EXISTS `tblresourcetype_companytype`;
@@ -219,33 +186,25 @@ CREATE TABLE `tblresourcetype_companytype` (
   CONSTRAINT `fk2ResourceType_CompanyType` FOREIGN KEY (`Company_tp`) REFERENCES `tblcompanytype` (`Company_tp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
-/*Data for the table `tblresourcetype_companytype` */
-
-insert  into `tblresourcetype_companytype`(`Resrc_tp`,`Company_tp`) values ('User','Company'),('UserAdmin','Company');
-
 /*Table structure for table `tbluser` */
 
 DROP TABLE IF EXISTS `tbluser`;
 
 CREATE TABLE `tbluser` (
   `User_id` int(11) NOT NULL,
-  `User_tp` varchar(64) NOT NULL,
-  `User_nm` varchar(256) NOT NULL,
-  `User_cd` varchar(128) NOT NULL,
-  `Hashed_cd` varchar(128) NOT NULL,
-  `Domain_cd` varchar(128) DEFAULT NULL,
-  `Email_nm` varchar(256) DEFAULT NULL,
-  `Challenge_cd` varchar(128) DEFAULT NULL,
-  `Response_cd` varchar(128) DEFAULT NULL,
+  `User_tp` varchar(64) NOT NULL COMMENT 'User type',
+  `User_nm` varchar(256) NOT NULL COMMENT 'User name',
+  `User_cd` varchar(128) NOT NULL COMMENT 'Title or password',
+  `Hashed_cd` varchar(128) NOT NULL COMMENT 'MD5 and confirmation code',
+  `Person_nm` varchar(256) NOT NULL COMMENT 'Full name',
+  `Email_nm` varchar(256) DEFAULT NULL COMMENT 'Email address',
+  `Challenge_cd` varchar(128) DEFAULT NULL COMMENT 'Security question',
+  `Response_cd` varchar(128) DEFAULT NULL COMMENT 'Security answer',
   PRIMARY KEY (`User_id`,`User_tp`),
   UNIQUE KEY `akResource_User` (`User_tp`,`User_nm`),
   CONSTRAINT `fk1User` FOREIGN KEY (`User_tp`) REFERENCES `tblusertype` (`User_tp`),
   CONSTRAINT `fk2User` FOREIGN KEY (`User_id`, `User_tp`) REFERENCES `tblresource` (`Resrc_id`, `Resrc_tp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
-
-/*Data for the table `tbluser` */
-
-insert  into `tbluser`(`User_id`,`User_tp`,`User_nm`,`User_cd`,`Hashed_cd`,`Domain_cd`,`Email_nm`,`Challenge_cd`,`Response_cd`) values (34,'User','user1','password','D5D28637ff95fb94bd660e8febd6ab93d8f9d8d8fbff3f0d',NULL,'tu1@vt.com','pet name','Bentley'),(35,'User','user2','password','E80BDB3F5be49571db86ca3796b355b267e71d95a6138515',NULL,'tu1@vt.com','pet name','Bentley'),(63,'User','User3','','',NULL,'test user\'s5',NULL,NULL),(64,'User','User5','','',NULL,'test user5',NULL,NULL),(65,'User','mpower','mypass','7BFB550Db4d2843a7f0addaf58b96fa278014c56c811bc1a',NULL,'tu1@vt.com','pet name','Bentley');
 
 /*Table structure for table `tblusertype` */
 
@@ -256,10 +215,6 @@ CREATE TABLE `tblusertype` (
   PRIMARY KEY (`User_tp`),
   CONSTRAINT `fk1UserType` FOREIGN KEY (`User_tp`) REFERENCES `tblresourcetype` (`Resrc_tp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
-
-/*Data for the table `tblusertype` */
-
-insert  into `tblusertype`(`User_tp`) values ('User'),('UserAdmin'),('UserClient'),('UserContact'),('UserServiceAccount'),('UserStaff');
 
 /* Procedure structure for procedure `errAKExist` */
 
@@ -2126,12 +2081,13 @@ DELIMITER ;
 
 DELIMITER $$
 
-/*!50003 CREATE DEFINER=`innovella`@`localhost` PROCEDURE `gfpUser`(
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `gfpUser`(
 	User_id		INT SIGNED		-- PK1 
 ,	User_tp		VARCHAR(64)		-- PK2 AK1
 ,	User_nm		VARCHAR(256)		--  AK2
 ,	User_cd		VARCHAR(128)	
 ,	Hashed_cd	VARCHAR(128)
+,	Person_nm	VARCHAR(256)
 ,	Email_nm	VARCHAR(256)
 ,	Challenge_cd	VARCHAR(128)
 ,	Response_cd	VARCHAR(128)
@@ -2186,6 +2142,7 @@ BEGIN
 	IF User_nm IS NULL OR User_nm = '' THEN SET User_nm = '-2147483647';	END IF;
 	IF User_cd IS NULL OR User_cd = '' THEN SET User_cd = '-2147483647';	END IF;
 	IF Hashed_cd IS NULL OR Hashed_cd = '' THEN SET Hashed_cd = '-2147483647';	END IF;
+	IF Person_nm IS NULL OR Person_nm = '' THEN SET Person_nm = '-2147483647';	END IF;
 	IF Email_nm IS NULL OR Email_nm = '' THEN SET Email_nm = '-2147483647';	END IF;
 	IF Challenge_cd IS NULL OR Challenge_cd = '' THEN SET Challenge_cd = '-2147483647';	END IF;
 	IF Response_cd IS NULL OR Response_cd = '' THEN SET Response_cd = '-2147483647';	END IF;
@@ -2308,6 +2265,10 @@ BEGIN
 		AND	(
 			tvwUser.Hashed_cd	LIKE CONCAT('%', Hashed_cd, '%')
 		OR	Hashed_cd	= '-2147483647'
+			)
+		AND	(
+			tvwUser.Person_nm	LIKE CONCAT('%', Person_nm, '%')
+		OR	Person_nm	= '-2147483647'
 			)
 		AND	(
 			tvwUser.Email_nm	LIKE CONCAT('%', Email_nm, '%')
@@ -2550,6 +2511,7 @@ DELIMITER $$
 ,	User_cd		VARCHAR(128)	
 ,	Alias_nm		VARCHAR(256)		--  AK2
 ,	Hashed_cd	VARCHAR(128)
+,	Person_nm	VARCHAR(256)
 ,	Email_nm	VARCHAR(256)
 ,	Challenge_cd	VARCHAR(128)
 ,	Response_cd	VARCHAR(128)
@@ -2603,6 +2565,7 @@ BEGIN
 	IF User_nm IS NULL OR User_nm = '' THEN SET User_nm = '-2147483647';	END IF;
 	IF User_cd IS NULL OR User_cd = '' THEN SET User_cd = '-2147483647';	END IF;
 	IF Hashed_cd IS NULL OR Hashed_cd = '' THEN SET Hashed_cd = '-2147483647';	END IF;
+	IF Person_nm IS NULL OR Person_nm = '' THEN SET Person_nm = '-2147483647';	END IF;
 	IF Alias_nm IS NULL OR Alias_nm = '' THEN SET Alias_nm = '-2147483647';	END IF;
 	IF Email_nm IS NULL OR Email_nm = '' THEN SET User_cd = '-2147483647';	END IF;
 	IF Challenge_cd IS NULL OR Challenge_cd = '' THEN SET Challenge_cd = '-2147483647';	END IF;
@@ -2748,6 +2711,10 @@ BEGIN
 		AND	(
 			tvwUser_Company.Hashed_cd	= Hashed_cd
 		OR	Hashed_cd	= '-2147483647'
+			)
+		AND	(
+			tvwUser_Company.Person_nm	LIKE CONCAT('%', Person_nm, '%')
+		OR	Person_nm	= '-2147483647'
 			)
 		AND	(
 			tvwUser_Company.Email_nm	LIKE CONCAT('%', Email_nm, '%')
@@ -5269,6 +5236,7 @@ INOUT	User_id		INT SIGNED		-- PK1
 ,	User_nm		VARCHAR(256)		--  AK2
 ,	User_cd		VARCHAR(128)	
 ,	Hashed_cd	VARCHAR(128)
+,	Person_nm	VARCHAR(256)
 ,	Email_nm	VARCHAR(256)
 ,	Challenge_cd	VARCHAR(128)
 ,	Response_cd	VARCHAR(128)
@@ -5330,6 +5298,7 @@ BEGIN
 		SET Hashed_cd = CONCAT(@salt, SHA(CONCAT(@salt, User_cd)));
 	END IF;
 	IF Email_nm IS NULL OR Email_nm = '' THEN SET ProcFailed_fg = TRUE;	END IF;
+	IF Person_nm IS NULL OR Person_nm = '' THEN SET Person_nm = NULL;	END IF;
 	IF Challenge_cd IS NULL OR Challenge_cd = '' THEN SET Challenge_cd = NULL;	END IF;
 	IF Response_cd IS NULL OR Response_cd = '' THEN SET Response_cd = NULL;	END IF;
 	IF User_tx IS NULL OR User_tx = '' THEN SET User_tx = NULL;	END IF;
@@ -5372,6 +5341,7 @@ BEGIN
 	,	@User_nm	:= User_nm
 	,	@User_cd	:= User_cd
 	,	@Hashed_cd	:= Hashed_cd
+	,	@Person_nm	:= Person_nm
 	,	@Email_nm	:= Email_nm
 	,	@Challenge_cd	:= Challenge_cd
 	,	@Response_cd	:= Response_cd
@@ -5431,6 +5401,7 @@ BEGIN
 	,	@User_nm	:= User_nm
 	,	@User_cd	:= User_cd
 	,	@Hashed_cd	:= Hashed_cd
+	,	@Person_nm	:= Person_nm
 	,	@Email_nm	:= Email_nm
 	,	@Challenge_cd	:= Challenge_cd
 	,	@Response_cd	:= Response_cd
@@ -5595,6 +5566,7 @@ BEGIN
 	,	User_nm
 	,	User_cd
 	,	Hashed_cd
+	,	Person_nm
 	,	Email_nm
 	,	Challenge_cd
 	,	Response_cd
@@ -5606,6 +5578,7 @@ BEGIN
 	,	User_nm
 	,	User_cd
 	,	Hashed_cd
+	,	Person_nm
 	,	Email_nm
 	,	Challenge_cd
 	,	Response_cd
@@ -5871,6 +5844,7 @@ INOUT	User_id		INT SIGNED		-- PK1
 ,	User_cd		VARCHAR(128)	
 ,	Alias_nm	VARCHAR(256)		--  AK2
 ,	Hashed_cd	VARCHAR(128)
+,	Person_nm	VARCHAR(256)
 ,	Email_nm	VARCHAR(256)
 ,	Challenge_cd	VARCHAR(128)
 ,	Response_cd	VARCHAR(128)
@@ -5938,6 +5912,7 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 	IF User_cd IS NULL OR User_cd = '' THEN SET ProcFailed_fg = TRUE;	END IF;
 	IF Alias_nm IS NULL OR Alias_nm = '' THEN SET Alias_nm = NULL;	END IF;
 	IF Email_nm IS NULL OR Email_nm = '' THEN SET ProcFailed_fg = TRUE;	END IF;
+	IF Person_nm IS NULL OR Person_nm = '' THEN SET Person_nm = NULL;	END IF;
 	IF Challenge_cd IS NULL OR Challenge_cd = '' THEN SET Challenge_cd = NULL;	END IF;
 	IF Response_cd IS NULL OR Response_cd = '' THEN SET Response_cd = NULL;	END IF;
 	IF Company_nm IS NULL OR Company_nm = '' THEN SET Company_nm = NULL;	END IF;
@@ -6114,6 +6089,7 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 		,	@User_nm	:= User_nm
 		,	@User_cd	:= User_cd
 		,	@Hashed_cd	:= Hashed_cd
+		,	@Person_nm	:= Person_nm
 		,	@Email_nm	:= Email_nm
 		,	@Challenge_cd	:= Challenge_cd
 		,	@Response_cd	:= Response_cd
@@ -6195,6 +6171,7 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 		,	@User_nm	:= User_nm
 		,	@User_cd	:= User_cd
 		,	@Hashed_cd	:= Hashed_cd
+		,	@Person_nm	:= Person_nm
 		,	@Email_nm	:= Email_nm
 		,	@Challenge_cd	:= Challenge_cd
 		,	@Response_cd	:= Response_cd
@@ -7628,12 +7605,13 @@ DELIMITER ;
 
 DELIMITER $$
 
-/*!50003 CREATE DEFINER=`innovella`@`localhost` PROCEDURE `rspUser`(
-	User_id		INT SIGNED		
-,	User_tp		VARCHAR(64)		
-,	User_nm		VARCHAR(256)		
-,	User_cd		VARCHAR(128)		
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `rspUser`(
+	User_id		INT SIGNED
+,	User_tp		VARCHAR(64)
+,	User_nm		VARCHAR(256)
+,	User_cd		VARCHAR(128)
 ,	Hashed_cd	VARCHAR(128)
+,	Person_nm	VARCHAR(256)
 ,	Email_nm	VARCHAR(256)
 ,	Challenge_cd	VARCHAR(128)
 ,	Response_cd	VARCHAR(128)
@@ -7664,6 +7642,7 @@ BEGIN
 	IF User_nm IS NULL OR User_nm = '' THEN SET User_nm = '-2147483647';	END IF;
 	IF User_cd IS NULL OR User_cd = '' THEN SET User_cd = '-2147483647';	END IF;
 	IF Hashed_cd IS NULL OR Hashed_cd = '' THEN SET Hashed_cd = '-2147483647';	END IF;
+	IF Person_nm IS NULL OR Person_nm = '' THEN SET Person_nm = '-2147483647';	END IF;
 	IF Email_nm IS NULL OR Email_nm = '' THEN SET Email_nm = '-2147483647';	END IF;
 	IF Challenge_cd IS NULL OR Challenge_cd = '' THEN SET Challenge_cd = '-2147483647';	END IF;
 	IF Response_cd IS NULL OR Response_cd = '' THEN SET Response_cd = '-2147483647';	END IF;
@@ -7780,6 +7759,10 @@ BEGIN
 			AND	(
 				Hashed_cd	= Hashed_cd
 			OR	Hashed_cd	= '-2147483647'
+				)
+			AND	(
+				Person_nm	LIKE CONCAT('%', Person_nm, '%')
+			OR	Person_nm	= '-2147483647'
 				)
 			AND	(
 				Email_nm	= Email_nm
@@ -10049,6 +10032,7 @@ DELIMITER $$
 ,	User_nm		VARCHAR(256)		--  AK2
 ,	User_cd		VARCHAR(128)	
 ,	Hashed_cd	VARCHAR(128)
+,	Person_nm	VARCHAR(256)
 ,	Email_nm	VARCHAR(256)
 ,	Challenge_cd	VARCHAR(128)
 ,	Response_cd	VARCHAR(128)
@@ -10104,6 +10088,7 @@ BEGIN
 	IF User_nm IS NULL OR User_nm = '' THEN SET User_nm = '-2147483647';	END IF;
 	IF User_cd IS NULL OR User_cd = '' THEN SET User_cd = '-2147483647';	END IF;
 	IF Hashed_cd IS NULL OR Hashed_cd = '' THEN SET Hashed_cd = '-2147483647';	END IF;
+	IF Person_nm IS NULL OR Person_nm = '' THEN SET Person_nm = '-2147483647';	END IF;
 	IF Email_nm IS NULL OR Email_nm = '' THEN SET User_cd = '-2147483647';	END IF;
 	IF Challenge_cd IS NULL OR Challenge_cd = '' THEN SET Challenge_cd = '-2147483647';	END IF;
 	IF Response_cd IS NULL OR Response_cd = '' THEN SET Response_cd = '-2147483647';	END IF;
@@ -10152,6 +10137,7 @@ BEGIN
 	,	@User_nm	:= User_nm
 	,	@User_cd	:= User_cd
 	,	@Hashed_cd	:= Hashed_cd
+	,	@Person_nm	:= Person_nm
 	,	@Email_nm	:= Email_nm
 	,	@Challenge_cd	:= Challenge_cd
 	,	@Response_cd	:= Response_cd
@@ -10183,6 +10169,7 @@ BEGIN
 	,	@User_nm	:= User_nm
 	,	@User_cd	:= User_cd
 	,	@Hashed_cd	:= Hashed_cd
+	,	@Person_nm	:= Person_nm
 	,	@Email_nm	:= Email_nm
 	,	@Challenge_cd	:= Challenge_cd
 	,	@Response_cd	:= Response_cd
@@ -10335,6 +10322,7 @@ BEGIN
 		User_nm	= '-2147483647'
 	AND 	User_cd	= '-2147483647'
 	AND 	Hashed_cd	= '-2147483647'
+	AND 	Person_nm	= '-2147483647'
 	AND 	Email_nm	= '-2147483647'
 	AND 	Challenge_cd	= '-2147483647'
 	AND 	Response_cd	= '-2147483647'
@@ -10373,6 +10361,12 @@ BEGIN
 			WHEN	Hashed_cd	= '-2147483647'
 			THEN	tblUser.Hashed_cd
 			ELSE 	Hashed_cd
+		END
+	,	tblUser.Person_nm	=
+		CASE
+			WHEN	Person_nm	= '-2147483647'
+			THEN	tblUser.Person_nm
+			ELSE 	Person_nm
 		END
 	,	tblUser.Email_nm	=
 		CASE
@@ -10635,6 +10629,7 @@ DELIMITER $$
 ,	User_cd		VARCHAR(128)	
 ,	Alias_nm	VARCHAR(256)		--  AK2
 ,	Hashed_cd	VARCHAR(128)
+,	Person_nm	VARCHAR(256)
 ,	Email_nm	VARCHAR(256)
 ,	Challenge_cd	VARCHAR(128)
 ,	Response_cd	VARCHAR(128)
@@ -10702,6 +10697,7 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 	IF User_nm IS NULL OR User_nm = '' THEN SET User_nm = '-2147483647';	END IF;
 	IF User_cd IS NULL OR User_cd = '' THEN SET User_cd = '-2147483647';	END IF;
 	IF Hashed_cd IS NULL OR Hashed_cd = '' THEN SET Hashed_cd = '-2147483647';	END IF;
+	IF Person_nm IS NULL OR Person_nm = '' THEN SET Person_nm = '-2147483647';	END IF;
 	IF Alias_nm IS NULL OR Alias_nm = '' THEN SET Alias_nm = '-2147483647';	END IF;
 	IF Email_nm IS NULL OR Email_nm = '' THEN SET User_cd = '-2147483647';	END IF;
 	IF Challenge_cd IS NULL OR Challenge_cd = '' THEN SET Challenge_cd = '-2147483647';	END IF;
@@ -10835,6 +10831,7 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 		,	@User_nm	:= User_nm
 		,	@User_cd	:= User_cd
 		,	@Hashed_cd	:= Hashed_cd
+		,	@Person_nm	:= Person_nm
 		,	@Email_nm	:= Email_nm
 		,	@Challenge_cd	:= Challenge_cd
 		,	@Response_cd	:= Response_cd
@@ -10917,6 +10914,7 @@ DECLARE CONTINUE HANDLER FOR NOT FOUND SET ProcFailed_fg	= 0;
 		,	@User_nm	:= User_nm
 		,	@User_cd	:= User_cd
 		,	@Hashed_cd	:= Hashed_cd
+		,	@Person_nm	:= Person_nm
 		,	@Email_nm	:= Email_nm
 		,	@Challenge_cd	:= Challenge_cd
 		,	@Response_cd	:= Response_cd
@@ -11668,12 +11666,13 @@ DELIMITER ;
 
 DELIMITER $$
 
-/*!50003 CREATE DEFINER=`innovella`@`localhost` PROCEDURE `vspUser`(
+/*!50003 CREATE DEFINER=`root`@`localhost` PROCEDURE `vspUser`(
 	User_id		INT SIGNED		
 ,	User_tp		VARCHAR(64)		
 ,	User_nm		VARCHAR(256)		
 ,	User_cd		VARCHAR(128)		
 ,	Hashed_cd	VARCHAR(128)
+,	Person_nm	VARCHAR(256)
 ,	Email_nm	VARCHAR(256)
 ,	Challenge_cd	VARCHAR(128)
 ,	Response_cd	VARCHAR(128)
@@ -11687,7 +11686,7 @@ BEGIN
 **	Type:		Validation Stored Procedure
 **	Purpose:	Validate a record in tblUser
 **	Author:		Solomon S. Shacter
-**	User:	Innovella, Inc.
+**	Organization:	Innovella, Inc.
 **
 **	Modified:	6/18/2013
 **	Modnumber:
@@ -11739,6 +11738,7 @@ BEGIN
 			,	@User_nm	:= User_nm
 			,	@User_cd	:= User_cd
 			,	@Hashed_cd	:= Hashed_cd
+			,	@Person_nm	:= Person_nm
 			,	@Email_nm	:= Email_nm
 			,	@Challenge_cd	:= Challenge_cd
 			,	@Response_cd	:= Response_cd
@@ -12271,6 +12271,7 @@ DROP TABLE IF EXISTS `tvwuser`;
  `User_nm` varchar(256) ,
  `User_cd` varchar(128) ,
  `Hashed_cd` varchar(128) ,
+ `Person_nm` varchar(256) ,
  `Email_nm` varchar(256) ,
  `Challenge_cd` varchar(128) ,
  `Response_cd` varchar(128) ,
@@ -12305,6 +12306,7 @@ DROP TABLE IF EXISTS `tvwuser_company`;
  `User_cd` varchar(128) ,
  `Alias_nm` varchar(256) ,
  `Hashed_cd` varchar(128) ,
+ `Person_nm` varchar(256) ,
  `Email_nm` varchar(256) ,
  `Challenge_cd` varchar(128) ,
  `Response_cd` varchar(128) ,
@@ -12426,14 +12428,14 @@ DROP TABLE IF EXISTS `tvwusertype`;
 /*!50001 DROP TABLE IF EXISTS `tvwuser` */;
 /*!50001 DROP VIEW IF EXISTS `tvwuser` */;
 
-/*!50001 CREATE ALGORITHM=UNDEFINED DEFINER=`innovella`@`localhost` SQL SECURITY DEFINER VIEW `tvwuser` AS select `tbluser`.`User_id` AS `User_id`,`tbluser`.`User_tp` AS `User_tp`,`tbluser`.`User_nm` AS `User_nm`,`tbluser`.`User_cd` AS `User_cd`,`tbluser`.`Hashed_cd` AS `Hashed_cd`,`tbluser`.`Email_nm` AS `Email_nm`,`tbluser`.`Challenge_cd` AS `Challenge_cd`,`tbluser`.`Response_cd` AS `Response_cd`,`tblresource`.`Resrc_tx` AS `User_tx`,`tblresource`.`ADD_dm` AS `UserADD_dm`,`tblresource`.`ADD_nm` AS `UserADD_nm`,`tblresource`.`UPD_dm` AS `UserUPD_dm`,`tblresource`.`UPD_nm` AS `UserUPD_nm`,`tblresource`.`DEL_dm` AS `UserDEL_dm`,`tblresource`.`DEL_nm` AS `UserDEL_nm`,`tvwusertype`.`ParentUser_tp` AS `ParentUser_tp`,`tvwusertype`.`UserType_tx` AS `UserType_tx`,`tvwusertype`.`UserTypeLeft_id` AS `UserTypeLeft_id`,`tvwusertype`.`UserTypeRight_id` AS `UserTypeRight_id`,`tvwusertype`.`UserTypeLevel_id` AS `UserTypeLevel_id`,`tvwusertype`.`UserTypeOrder_id` AS `UserTypeOrder_id` from ((`tbluser` join `tvwusertype` on((`tbluser`.`User_tp` = `tvwusertype`.`User_tp`))) join `tblresource` on(((`tbluser`.`User_id` = `tblresource`.`Resrc_id`) and (`tbluser`.`User_tp` = `tblresource`.`Resrc_tp`)))) */;
+/*!50001 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `tvwuser` AS select `tbluser`.`User_id` AS `User_id`,`tbluser`.`User_tp` AS `User_tp`,`tbluser`.`User_nm` AS `User_nm`,`tbluser`.`User_cd` AS `User_cd`,`tbluser`.`Hashed_cd` AS `Hashed_cd`,`tbluser`.`Person_nm` AS `Person_nm`,`tbluser`.`Email_nm` AS `Email_nm`,`tbluser`.`Challenge_cd` AS `Challenge_cd`,`tbluser`.`Response_cd` AS `Response_cd`,`tblresource`.`Resrc_tx` AS `User_tx`,`tblresource`.`ADD_dm` AS `UserADD_dm`,`tblresource`.`ADD_nm` AS `UserADD_nm`,`tblresource`.`UPD_dm` AS `UserUPD_dm`,`tblresource`.`UPD_nm` AS `UserUPD_nm`,`tblresource`.`DEL_dm` AS `UserDEL_dm`,`tblresource`.`DEL_nm` AS `UserDEL_nm`,`tvwusertype`.`ParentUser_tp` AS `ParentUser_tp`,`tvwusertype`.`UserType_tx` AS `UserType_tx`,`tvwusertype`.`UserTypeLeft_id` AS `UserTypeLeft_id`,`tvwusertype`.`UserTypeRight_id` AS `UserTypeRight_id`,`tvwusertype`.`UserTypeLevel_id` AS `UserTypeLevel_id`,`tvwusertype`.`UserTypeOrder_id` AS `UserTypeOrder_id` from ((`tbluser` join `tvwusertype` on((`tbluser`.`User_tp` = `tvwusertype`.`User_tp`))) join `tblresource` on(((`tbluser`.`User_id` = `tblresource`.`Resrc_id`) and (`tbluser`.`User_tp` = `tblresource`.`Resrc_tp`)))) */;
 
 /*View structure for view tvwuser_company */
 
 /*!50001 DROP TABLE IF EXISTS `tvwuser_company` */;
 /*!50001 DROP VIEW IF EXISTS `tvwuser_company` */;
 
-/*!50001 CREATE ALGORITHM=UNDEFINED DEFINER=`innovella`@`localhost` SQL SECURITY DEFINER VIEW `tvwuser_company` AS select `tvwuser`.`User_id` AS `User_id`,`tvwuser`.`User_tp` AS `User_tp`,`tblresource_company`.`Company_id` AS `Company_id`,`tblresource_company`.`Company_tp` AS `Company_tp`,`tvwuser`.`User_nm` AS `User_nm`,`tvwuser`.`User_cd` AS `User_cd`,`tblresource_company`.`Alias_nm` AS `Alias_nm`,`tvwuser`.`Hashed_cd` AS `Hashed_cd`,`tvwuser`.`Email_nm` AS `Email_nm`,`tvwuser`.`Challenge_cd` AS `Challenge_cd`,`tvwuser`.`Response_cd` AS `Response_cd`,`tvwcompany`.`Company_nm` AS `Company_nm`,`tvwcompany`.`Company_cd` AS `Company_cd`,`tvwuser`.`User_tx` AS `User_tx`,`tvwcompany`.`Company_tx` AS `Company_tx`,`tblresource_company`.`ADD_dm` AS `ADD_dm`,`tblresource_company`.`ADD_nm` AS `ADD_nm`,`tblresource_company`.`UPD_dm` AS `UPD_dm`,`tblresource_company`.`UPD_nm` AS `UPD_nm`,`tblresource_company`.`DEL_dm` AS `DEL_dm`,`tblresource_company`.`DEL_nm` AS `DEL_nm` from ((`tblresource_company` join `tvwuser` on(((`tblresource_company`.`Resrc_id` = `tvwuser`.`User_id`) and (`tblresource_company`.`Resrc_tp` = `tvwuser`.`User_tp`)))) join `tvwcompany` on(((`tblresource_company`.`Company_id` = `tvwcompany`.`Company_id`) and (`tblresource_company`.`Company_tp` = `tvwcompany`.`Company_tp`)))) */;
+/*!50001 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `tvwuser_company` AS select `tvwuser`.`User_id` AS `User_id`,`tvwuser`.`User_tp` AS `User_tp`,`tblresource_company`.`Company_id` AS `Company_id`,`tblresource_company`.`Company_tp` AS `Company_tp`,`tvwuser`.`User_nm` AS `User_nm`,`tvwuser`.`User_cd` AS `User_cd`,`tblresource_company`.`Alias_nm` AS `Alias_nm`,`tvwuser`.`Hashed_cd` AS `Hashed_cd`,`tvwuser`.`Person_nm` AS `Person_nm`,`tvwuser`.`Email_nm` AS `Email_nm`,`tvwuser`.`Challenge_cd` AS `Challenge_cd`,`tvwuser`.`Response_cd` AS `Response_cd`,`tvwcompany`.`Company_nm` AS `Company_nm`,`tvwcompany`.`Company_cd` AS `Company_cd`,`tvwuser`.`User_tx` AS `User_tx`,`tvwcompany`.`Company_tx` AS `Company_tx`,`tblresource_company`.`ADD_dm` AS `ADD_dm`,`tblresource_company`.`ADD_nm` AS `ADD_nm`,`tblresource_company`.`UPD_dm` AS `UPD_dm`,`tblresource_company`.`UPD_nm` AS `UPD_nm`,`tblresource_company`.`DEL_dm` AS `DEL_dm`,`tblresource_company`.`DEL_nm` AS `DEL_nm` from ((`tblresource_company` join `tvwuser` on(((`tblresource_company`.`Resrc_id` = `tvwuser`.`User_id`) and (`tblresource_company`.`Resrc_tp` = `tvwuser`.`User_tp`)))) join `tvwcompany` on(((`tblresource_company`.`Company_id` = `tvwcompany`.`Company_id`) and (`tblresource_company`.`Company_tp` = `tvwcompany`.`Company_tp`)))) */;
 
 /*View structure for view tvwusertype */
 

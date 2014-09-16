@@ -13,6 +13,18 @@ E.G. $page_title = "Custom Title" */
 
 $page_title = "Forgot Password";
 
+require_once("inc/config.SiteUtil.php");
+
+$emailsent = false;
+if( isset( $_POST["submitted"] ) )
+{
+   if( $siteutil->EmailResetPasswordLink() )
+   {
+        $siteutil->RedirectToURL( "forgotpassword-sent.html" );
+        exit;
+   }
+}
+
 /* ---------------- END PHP Custom Scripts ------------- */
 
 //include header

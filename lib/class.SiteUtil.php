@@ -40,8 +40,8 @@ class SiteUtil
     //-----Initialization -------
     function SiteUtil()
     {
-        $this->sitename = 'LandscapeGalleria.com';
-        $this->rand_key = '0iQx5oBk66oVZep';
+        $this->sitename = "LandscapeGalleria.com";
+        $this->rand_key = "0iQx5oBk66oVZep";
     }
     
     function InitDB($host,$uname,$pwd,$database,$tablename)
@@ -96,29 +96,31 @@ class SiteUtil
             return false;
         }
 
-/*
-        $this->SendAdminIntimationEmail($formvars);
-*/        
+        if( !$this->SendAdminIntimationEmail($formvars) ) 
+        {
+            return false;
+        }
         return true;
     }
 
     function ConfirmUser()
     {
-        if(empty($_GET['code'])||strlen($_GET['code'])<=10)
+        if( empty( $_GET["code"] ) || strlen($_GET["code"] ) <=10 )
         {
-            $this->HandleError("Please provide the confirm code");
+            $this->HandleError( " Please provide the confirm code from the registration email you received." );
             return false;
         }
+
         $user_rec = array();
-        if(!$this->UpdateDBRecForConfirmation($user_rec))
+        if( !$this->UpdateDBRecForConfirmation( $user_rec ) )
         {
             return false;
         }
         
-        $this->SendUserWelcomeEmail($user_rec);
-/*        
-        $this->SendAdminIntimationOnRegComplete($user_rec);
-*/        
+        $this->SendUserWelcomeEmail( $user_rec );
+
+        $this->SendAdminIntimationOnRegComplete( $user_rec );
+
         return true;
     }    
     
@@ -170,22 +172,22 @@ class SiteUtil
     
 	function UserRows()
 	{
-		return isset( $_SESSION["UserRows"] ) ? $_SESSION["UserRows"]:'';
+		return isset( $_SESSION["UserRows"] ) ? $_SESSION["UserRows"]:"";
 	}
 
 	function UserCompanyRows()
 	{
-		return isset( $_SESSION["UserCompanyRows"] ) ? $_SESSION["UserCompanyRows"]:'';
+		return isset( $_SESSION["UserCompanyRows"] ) ? $_SESSION["UserCompanyRows"]:"";
 	}
 
     function UserFullName()
     {
-        return isset( $_SESSION["Person_nm"] ) ? $_SESSION["Person_nm"]:'';
+        return isset( $_SESSION["Person_nm"] ) ? $_SESSION["Person_nm"]:"";
     }
     
     function UserEmail()
     {
-        return isset( $_SESSION["Email_nm"] ) ? $_SESSION["Email_nm"]:'';
+        return isset( $_SESSION["Email_nm"] ) ? $_SESSION["Email_nm"]:"";
     }
     
     function LogOut()
@@ -332,9 +334,9 @@ class SiteUtil
     
     function GetErrorMessage()
     {
-        if(empty($this->error_message))
+        if( empty( $this->error_message ) )
         {
-            return '';
+            return "";
         }
         $errormsg = nl2br( htmlentities( $this->error_message ) );
         return $errormsg;
@@ -353,7 +355,7 @@ class SiteUtil
     
     function GetFromAddress()
     {
-        if(!empty($this->from_address))
+        if( !empty( $this->from_address ) )
         {
             return $this->from_address;
         }
@@ -406,32 +408,39 @@ class SiteUtil
 *	@FINISH:Innovella
 */
     
-    function UpdateDBRecForConfirmation(&$user_rec)
+    function UpdateDBRecForConfirmation( &$user_rec )
     {
-        if(!$this->DBLogin())
+        $confirmcode = $this->SanitizeForSQL( $_GET["code"] );
+
+		$user = new User();
+		$user->User_tp = "User";
+		$user->Hashed_cd = $confirmcode;	// User has confirmed their registration
+		$user->Key_cd = "AL";
+		$userrows = User::select( $user );
+
+        if( $user->RowCount <= 0 )
         {
-            $this->HandleError("Database login failed!");
-            return false;
-        }   
-        $confirmcode = $this->SanitizeForSQL($_GET['code']);
-        
-        $result = mysql_query("Select name, email from $this->tablename where confirmcode='$confirmcode'",$this->connection);   
-        if(!$result || mysql_num_rows($result) <= 0)
-        {
-            $this->HandleError("Wrong confirm code.");
+            $this->HandleError( "Error! You entered the wrong confirmation code." );
             return false;
         }
-        $row = mysql_fetch_assoc($result);
-        $user_rec['name'] = $row['name'];
-        $user_rec['email']= $row['email'];
-        
-        $qry = "Update $this->tablename Set confirmcode='y' Where  confirmcode='$confirmcode'";
-        
-        if(!mysql_query( $qry ,$this->connection))
-        {
-            $this->HandleDBError("Error inserting data to the table\nquery:$qry");
+
+        $user_rec["Person_nm"] = $userrows[0]->Person_nm;
+        $user_rec["Email_nm"] = $userrows[0]->Email_nm;
+
+		try
+		{
+			$user->User_id = $userrows[0]->User_id;
+			$user->User_tp = "User";
+			$user->Hashed_cd = "Y";
+			$user->Mode_cd = "C";
+			$userrows = User::update( $user );
+		}
+		catch( Exception $e )
+		{
+            $this->HandleError("Error! Update failed for this User: " . $user->User_id . " : " . $e->getmessage() );
             return false;
-        }      
+		}
+
         return true;
     }
     
@@ -482,26 +491,26 @@ class SiteUtil
         return true;
     }
     
-    function SendUserWelcomeEmail(&$user_rec)
+    function SendUserWelcomeEmail( &$user_rec )
     {
         $mailer = new PHPMailer();
         
-        $mailer->CharSet = 'utf-8';
+        $mailer->CharSet = "utf-8";
         
-        $mailer->AddAddress($user_rec['email'],$user_rec['name']);
+        $mailer->AddAddress( $user_rec["Email_nm"], $user_rec["Person_nm"] );
         
         $mailer->Subject = "Welcome to ".$this->sitename;
 
         $mailer->From = $this->GetFromAddress();        
         
-        $mailer->Body ="Hello ".$user_rec['name']."\r\n\r\n".
-        "Welcome! Your registration  with ".$this->sitename." is completed.\r\n".
+        $mailer->Body ="Hello ".$user_rec["Person_nm"]."\r\n\r\n".
+        "Welcome! Your registration  with ".$this->sitename." is now complete.\r\n".
         "\r\n".
         "Regards,\r\n".
         "Webmaster\r\n".
         $this->sitename;
 
-        if(!$mailer->Send())
+        if( !$mailer->Send() )
         {
             $this->HandleError("Failed sending user welcome email.");
             return false;
@@ -509,27 +518,27 @@ class SiteUtil
         return true;
     }
     
-    function SendAdminIntimationOnRegComplete(&$user_rec)
+    function SendAdminIntimationOnRegComplete( &$user_rec )
     {
-        if(empty($this->admin_email))
+        if( empty( $this->admin_email ) )
         {
             return false;
         }
         $mailer = new PHPMailer();
         
-        $mailer->CharSet = 'utf-8';
+        $mailer->CharSet = "utf-8";
         
-        $mailer->AddAddress($this->admin_email);
+        $mailer->AddAddress( $this->admin_email );
         
-        $mailer->Subject = "Registration Completed: ".$user_rec['name'];
+        $mailer->Subject = "Registration Completed: ".$user_rec["Person_nm"];
 
         $mailer->From = $this->GetFromAddress();         
         
         $mailer->Body ="A new user registered at ".$this->sitename."\r\n".
-        "Name: ".$user_rec['name']."\r\n".
-        "Email address: ".$user_rec['email']."\r\n";
-        
-        if(!$mailer->Send())
+        "Name: ".$user_rec["Person_nm"]."\r\n".
+        "Email address: ".$user_rec["Email_nm"]."\r\n";
+
+        if( !$mailer->Send() )
         {
             return false;
         }
@@ -543,24 +552,24 @@ class SiteUtil
     
     function SendResetPasswordLink($user_rec)
     {
-        $email = $user_rec['email'];
+        $email = $user_rec["Email_nm"];
         
         $mailer = new PHPMailer();
         
-        $mailer->CharSet = 'utf-8';
+        $mailer->CharSet = "utf-8";
         
-        $mailer->AddAddress($email,$user_rec['name']);
+        $mailer->AddAddress($email,$user_rec["Person_nm"]);
         
         $mailer->Subject = "Your reset password request at ".$this->sitename;
 
         $mailer->From = $this->GetFromAddress();
         
         $link = $this->GetAbsoluteURLFolder().
-                '/resetpwd.php?email='.
-                urlencode($email).'&code='.
+                "/resetpwd.php?email=".
+                urlencode($email)."&code=".
                 urlencode($this->GetResetPasswordCode($email));
 
-        $mailer->Body ="Hello ".$user_rec['name']."\r\n\r\n".
+        $mailer->Body ="Hello ".$user_rec["Person_nm"]."\r\n\r\n".
         "There was a request to reset your password at ".$this->sitename."\r\n".
         "Please click the link below to complete the request: \r\n".$link."\r\n".
         "Regards,\r\n".
@@ -576,19 +585,19 @@ class SiteUtil
     
     function SendNewPassword($user_rec, $new_password)
     {
-        $email = $user_rec['email'];
+        $email = $user_rec["Email_nm"];
         
         $mailer = new PHPMailer();
         
-        $mailer->CharSet = 'utf-8';
+        $mailer->CharSet = "utf-8";
         
-        $mailer->AddAddress($email,$user_rec['name']);
+        $mailer->AddAddress($email,$user_rec["Person_nm"]);
         
         $mailer->Subject = "Your new password for ".$this->sitename;
 
         $mailer->From = $this->GetFromAddress();
         
-        $mailer->Body ="Hello ".$user_rec['name']."\r\n\r\n".
+        $mailer->Body ="Hello ".$user_rec["Person_nm"]."\r\n\r\n".
         "Your password is reset successfully. ".
         "Here is your updated login:\r\n".
         "username:".$user_rec['username']."\r\n".
@@ -682,29 +691,31 @@ class SiteUtil
         return $scriptFolder;
     }
     
-    function SendAdminIntimationEmail(&$formvars)
+    function SendAdminIntimationEmail( &$formvars )
     {
-        if(empty($this->admin_email))
+        if( empty( $this->admin_email ) )
         {
             return false;
         }
+
         $mailer = new PHPMailer();
         
-        $mailer->CharSet = 'utf-8';
+        $mailer->CharSet = "utf-8";
         
-        $mailer->AddAddress($this->admin_email);
+        $mailer->AddAddress( $this->admin_email );
         
-        $mailer->Subject = "New registration: ".$formvars['Person_nm'];
+        $mailer->Subject = "New registration: ". $formvars["Person_nm"];
 
         $mailer->From = $this->GetFromAddress();         
         
         $mailer->Body ="A new user registered at ".$this->sitename."\r\n".
-        "Name: ".$formvars['Person_nm']."\r\n".
-        "Email address: ".$formvars['Email_nm']."\r\n".
-        "UserName: ".$formvars['User_nm'];
+        "Name: ".$formvars["Person_nm"]."\r\n".
+        "Email address: ".$formvars["Email_nm"]."\r\n".
+        "UserName: ".$formvars["User_nm"];
         
-        if(!$mailer->Send())
+        if( !$mailer->Send() )
         {
+            $this->HandleError("Failed sending registration email to Admin account. " . $mailer->ErrorInfo);
             return false;
         }
         return true;

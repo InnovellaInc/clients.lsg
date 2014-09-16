@@ -271,17 +271,18 @@ CALL ispUser
 			$st->bindParam( ":Mode_cd", $obj->Mode_cd, PDO::PARAM_STR );
 			$st->execute();
 
-			$RowCount = $st->rowCount();
-			if ( $RowCount <= 0 )
+			$obj->RowCount = $st->rowCount();
+			if ( $obj->RowCount <= 0 )
 			{
 				$st->closeCursor();
+				return ( $obj->RowCount );
 				exit();
 			}
 
-			$objSet = $st->fetchALL( PDO::FETCH_OBJ );
+			$obj->Rows = $st->fetchALL( PDO::FETCH_OBJ );
 			$st->closeCursor();
 			DataAccessObject::disconnect( $conn );
-			return $objSet;
+			return ( $obj->Rows );
 		}
 		catch( PDOException $e )
 		{
@@ -331,7 +332,7 @@ CALL uspUser
 		try
 		{
 			$st = $conn->prepare( $sql );
-			$st->bindParam( ":User_id ", $obj->User_id , PDO::PARAM_INT );
+			$st->bindParam( ":User_id", $obj->User_id, PDO::PARAM_INT );
 			$st->bindParam( ":User_tp", $obj->User_tp, PDO::PARAM_STR );
 			$st->bindParam( ":User_nm", $obj->User_nm, PDO::PARAM_STR );
 			$st->bindParam( ":User_cd", $obj->User_cd, PDO::PARAM_STR );
@@ -344,11 +345,18 @@ CALL uspUser
 			$st->bindParam( ":Mode_cd", $obj->Mode_cd, PDO::PARAM_STR );
 			$st->execute();
 
-			$RowCount = $st->rowCount();
+			$obj->RowCount = $st->rowCount();
+			if ( $obj->RowCount <= 0 )
+			{
+				$st->closeCursor();
+				return ( $obj->RowCount );
+				exit();
+			}
+
+			$obj->Rows = $st->fetchALL( PDO::FETCH_OBJ );
 			$st->closeCursor();
 			DataAccessObject::disconnect( $conn );
-
-			return ($obj);
+			return ( $obj->Rows );
 		}
 		catch( PDOException $e)
 		{

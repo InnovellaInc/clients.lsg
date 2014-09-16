@@ -10,7 +10,8 @@ require_once("inc/init.php");
 				$ui = new SmartUI;
 				$ui->start_track();
 				
-				$data = json_decode(file_get_contents(APP_URL.'/data/data.json'));
+//				$data = json_decode(file_get_contents(APP_URL.'/data/data.json'));
+				$data = json_decode(file_get_contents('../data/data.json'));
 
 				// SmartForm layout
 				

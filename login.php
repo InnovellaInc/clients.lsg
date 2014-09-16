@@ -94,19 +94,18 @@ include("inc/header.php");
 						<header>
 							Sign In
 						</header>
-
-						<fieldset>
 <!-- @START:Innovella -->
 <input type='hidden' name='submitted' id='submitted' value='1'/>
-<div id="login-error" class="alert" data-dismiss="alert"><?php echo $siteutil->GetErrorMessage(); ?>
+<div class=".alert alert-danger alert-heading">
+<span><?php echo $siteutil->GetErrorMessage(); ?></span>
 </div>
 <!-- @FINISH:Innovella -->
+						<fieldset>
 							<section>
 								<label class="label">UserName</label>
 								<label class="input"> <i class="icon-append fa fa-user"></i>
 									<input type="text" name="User_nm" id="User_nm" value="<?php echo $siteutil->SafeDisplay('User_nm') ?>" maxlength="50">
 									<b class="tooltip tooltip-top-right"><i class="fa fa-user txt-color-teal"></i> Please enter your UserName</b></label>
-<span id='login_username_errorloc' class='error'></span>
 							</section>
 
 							<section>
@@ -114,7 +113,6 @@ include("inc/header.php");
 								<label class="input"> <i class="icon-append fa fa-lock"></i>
 									<input type="password" name="User_cd" id="User_cd" maxlength="50">
 									<b class="tooltip tooltip-top-right"><i class="fa fa-lock txt-color-teal"></i> Enter your password</b> </label>
-<span id='login_password_errorloc' class='error'></span>
 								<div class="note">
 									<a href="<?php echo APP_URL; ?>/forgotpassword.php">Forgot password?</a>
 								</div>
