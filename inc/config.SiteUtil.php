@@ -18,15 +18,20 @@ $siteutil->SetAdminEmail("info@LandscapeGalleria.com");
 //hostname, user name, password, database name and table name
 //note that the script will create the table (for example, fgusers in this case)
 //by itself on submitting register.php for the first time
-$siteutil->InitDB(/*hostname*/'localhost',
-                      /*username*/'innovella',
-                      /*password*/'Innovella123',
+$siteutil->InitDB(/*hostname*/'50.62.22.176',
+                      /*username*/'phpw3bs1t3',
+                      /*password*/'G@ll3r!@.db1',
                       /*database name*/'public_lsg',
                       /*table name*/'fgusers3');
+
+//$siteutil->InitDB(/*hostname*/'localhost',
+//                      /*username*/'innovella',
+//                      /*password*/'Innovella123',
+//                      /*database name*/'public_lsg',
+//                      /*table name*/'fgusers3');
+
 
 //For better security. Get a random string from this link: http://tinyurl.com/randstr
 // and put it here
 $siteutil->SetRandomKey('qSRcVS6DrTzrPvr');
-
 ?>
-<!-- @FINISH:Innovella -->

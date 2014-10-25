@@ -15,10 +15,18 @@ defined("APP_URL") ? null : define("APP_URL", str_replace("/lib", "", $base_url)
 defined("ASSETS_URL") ? null : define("ASSETS_URL", APP_URL);
 
 // @LSG:START
-defined( "DB_HOST" ) ? null : define( "DB_HOST", "localhost" );
+//	@LSG:Local
+//defined( "DB_HOST" ) ? null : define( "DB_HOST", "localhost" );
+//defined( "DB_DSN" ) ? null : define( "DB_DSN", "mysql:dbname=local_lsg" );
+//defined( "DB_USERNAME" ) ? null : define( "DB_USERNAME", "innovella" );
+//defined( "DB_PASSWORD" ) ? null : define( "DB_PASSWORD", "Innovella123" );
+//defined( "DB_NAME" ) ? null : define( "DB_NAME", "local_lsg" );
+
+// @LSG:PUBLIC
+defined( "DB_HOST" ) ? null : define( "DB_HOST", "50.62.22.176" );
 defined( "DB_DSN" ) ? null : define( "DB_DSN", "mysql:dbname=public_lsg" );
-defined( "DB_USERNAME" ) ? null : define( "DB_USERNAME", "innovella" );
-defined( "DB_PASSWORD" ) ? null : define( "DB_PASSWORD", "Innovella123" );
+defined( "DB_USERNAME" ) ? null : define( "DB_USERNAME", "phpw3bs1t3" );
+defined( "DB_PASSWORD" ) ? null : define( "DB_PASSWORD", "G@ll3r!@.db1" );
 defined( "DB_NAME" ) ? null : define( "DB_NAME", "public_lsg" );
 
 defined( "PAGE_SIZE" ) ? null : define( "PAGE_SIZE", 25 );

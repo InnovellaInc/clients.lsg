@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `righttype`;
 CREATE TABLE `righttype` (
   `Right_tp` varchar(64) NOT NULL,
   PRIMARY KEY (`Right_tp`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf32 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
 /*Table structure for table `tblcompany` */
 

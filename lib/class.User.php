@@ -1,14 +1,14 @@
 <?php
 
-require_once __DIR__ . "\class.Accessor.php";
-require_once __DIR__ . "\class.DataAccessObject.php";
+require_once __DIR__ . "/class.Accessor.php";
+require_once __DIR__ . "/class.DataAccessObject.php";
 
-require __DIR__ . "\class.PDODebugger.php";
+require __DIR__ . "/class.PDODebugger.php";
 
 /** 
  * The Company class. The Company class maps the database Company object to the application Company object.  
  USE:
-	require_once __DIR__ . "\lib\class.Company.php";
+	require_once __DIR__ . "/lib/class.Company.php";
 	$objCompany = null;
 	$objCompany = new Company();
 	$objCompany->User_tp = "Company";

@@ -61,13 +61,9 @@ include("inc/header.php");
 					<div id="siteutil" class="well no-padding">
 						<form id="confirm" action="<?php echo $siteutil->GetSelfScript(); ?>" class="smart-form client-form" method="get" accept-charset="UTF-8">
 							<header>Registration Confirmation</header>
-							<div>
 <div class=".alert alert-danger alert-heading">
 <span><?php echo $siteutil->GetErrorMessage(); ?></span>
-</div>
-<!--<strong>Error! </strong>-->
-							</div>	<!-- error message END -->
-
+</div><!-- error message END -->
 							<fieldset>
 								<section>
 									<label class="input"> <i class="icon-append fa fa-building"></i>
@@ -147,10 +143,10 @@ Uses the excellent form validation script from JavaScript-coder.com-->
 
 // <![CDATA[
 
-    var frmvalidator  = new Validator("confirm");
-    frmvalidator.EnableOnPageErrorDisplay();
-    frmvalidator.EnableMsgsTogether();
-//    frmvalidator.addValidation("code","req","Please enter the confirmation code");
+//    var frmvalidator  = new Validator("confirm");
+//    frmvalidator.EnableOnPageErrorDisplay();
+//    frmvalidator.EnableMsgsTogether();
+////    frmvalidator.addValidation("code","req","Please enter the confirmation code");
 
 // ]]>
 </script>

@@ -1,11 +1,11 @@
 <?php
 
-require_once __DIR__ . "\class.Accessor.php";
-require_once __DIR__ . "\class.DataAccessObject.php";
+require_once __DIR__ . "/class.Accessor.php";
+require_once __DIR__ . "/class.DataAccessObject.php";
 /** 
  * The Resource class. The Resource class maps the database Resource object to the application Resource object.  
  USE:
-	require_once __DIR__ . "\lib\class.Resource.php";
+	require_once __DIR__ . "/lib/class.Resource.php";
 	$objResource = null;
 	$objResource = new Resource();
 	$objResource->Resrc_tp = "Resource";

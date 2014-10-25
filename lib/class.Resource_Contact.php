@@ -1,14 +1,14 @@
 <?php
 
-require_once __DIR__ . "\class.Accessor.php";
-require_once __DIR__ . "\class.DataAccessObject.php";
+require_once __DIR__ . "/class.Accessor.php";
+require_once __DIR__ . "/class.DataAccessObject.php";
 
-require __DIR__ . "\class.PDODebugger.php";
+require __DIR__ . "/class.PDODebugger.php";
 
 /** 
  * The Contact class. The Contact class maps the database Contact object to the application Contact object.  
  USE:
-	require_once __DIR__ . "\lib\class.Contact.php";
+	require_once __DIR__ . "/lib/class.Contact.php";
 	$objContact = null;
 	$objContact = new Contact();
 	$objContact->Resrc_tp = "Contact";
